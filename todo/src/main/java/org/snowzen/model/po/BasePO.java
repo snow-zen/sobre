@@ -14,6 +14,9 @@ import javax.persistence.MappedSuperclass;
 @Data
 public abstract class BasePO {
 
+    /**
+     * 主键id
+     */
     @Id
     protected Integer id;
 
