@@ -5,7 +5,9 @@ import lombok.EqualsAndHashCode;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import java.util.List;
 
 /**
  * 标签实体类
@@ -23,4 +25,10 @@ public class TagPO extends BasePO {
      */
     @Column
     private String name;
+
+    /**
+     * 关联任务
+     */
+    @OneToMany(mappedBy = "task.tag")
+    private List<TaskPO> tasks;
 }

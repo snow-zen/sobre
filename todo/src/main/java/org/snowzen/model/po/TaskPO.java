@@ -3,10 +3,9 @@ package org.snowzen.model.po;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * 任务实体类
@@ -42,4 +41,16 @@ public class TaskPO extends BaseWithTimePO {
      */
     @Column
     private Boolean active;
+
+    /**
+     * 关联标签
+     */
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "tag")
+    private List<TagPO> tags;
+
+    /**
+     * 关联分类
+     */
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "category")
+    private List<CategoryPO> categories;
 }

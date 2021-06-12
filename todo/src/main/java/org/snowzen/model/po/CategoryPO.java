@@ -5,7 +5,9 @@ import lombok.EqualsAndHashCode;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import java.util.List;
 
 /**
  * 分类实体类
@@ -23,4 +25,7 @@ public class CategoryPO extends BasePO {
      */
     @Column
     private String name;
+
+    @OneToMany(mappedBy = "task.category")
+    private List<TaskPO> tasks;
 }
