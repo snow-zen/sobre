@@ -5,6 +5,8 @@ import lombok.EqualsAndHashCode;
 
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import java.time.LocalDateTime;
 
 /**
@@ -28,4 +30,16 @@ public abstract class BaseWithTimePO extends BasePO {
      */
     @Column(name = "gmt_modified")
     protected LocalDateTime modifiedTime;
+
+    @PrePersist
+    public void prePersistCallback() {
+        LocalDateTime now = LocalDateTime.now();
+        createTime = now;
+        modifiedTime = now;
+    }
+
+    @PreUpdate
+    public void preUpdateCallback() {
+        modifiedTime = LocalDateTime.now();
+    }
 }
