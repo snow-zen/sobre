@@ -47,6 +47,12 @@ public class TaskPO extends BaseWithTimePO implements Convertible<TaskDTO> {
     private Boolean active;
 
     @Override
+    public void prePersistCallback() {
+        super.prePersistCallback();
+        active = Boolean.TRUE;
+    }
+
+    @Override
     public TaskDTO convert() {
         TaskDTO taskDTO = new TaskDTO();
         BeanUtils.copyProperties(this, taskDTO);
