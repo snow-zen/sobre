@@ -8,6 +8,8 @@ import javax.persistence.MappedSuperclass;
 import java.time.LocalDateTime;
 
 /**
+ * 携带创建时间与更新时间的基础实体类
+ *
  * @author snow-zen
  */
 @MappedSuperclass
