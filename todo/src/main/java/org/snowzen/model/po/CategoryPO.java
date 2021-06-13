@@ -5,7 +5,7 @@ import lombok.EqualsAndHashCode;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.OneToMany;
+import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import java.util.List;
 
@@ -14,7 +14,7 @@ import java.util.List;
  *
  * @author snow-zen
  */
-@Table(name = "category")
+@Table(name = "TODO_CATEGORY")
 @Entity
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -26,6 +26,9 @@ public class CategoryPO extends BasePO {
     @Column
     private String name;
 
-    @OneToMany(mappedBy = "task.category")
+    /**
+     * 关联分类
+     */
+    @ManyToMany(mappedBy = "categories")
     private List<TaskPO> tasks;
 }

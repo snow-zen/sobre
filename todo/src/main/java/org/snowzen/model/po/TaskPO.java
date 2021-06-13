@@ -12,7 +12,7 @@ import java.util.List;
  *
  * @author snow-zen
  */
-@Table(name = "task")
+@Table(name = "TODO_TASK")
 @Entity
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -33,24 +33,32 @@ public class TaskPO extends BaseWithTimePO {
     /**
      * 完成时间
      */
-    @Column(table = "finish_time")
+    @Column(name = "finish_time")
     private LocalDateTime finishTime;
 
     /**
      * 活动状态
      */
-    @Column
+    @Column(name = "is_active")
     private Boolean active;
 
     /**
      * 关联标签
      */
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "tag")
+    @ManyToMany(cascade = CascadeType.REMOVE)
+    @JoinTable(
+            name = "TODO_TASK_TAG",
+            joinColumns = @JoinColumn(name = "task_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id", referencedColumnName = "id"))
     private List<TagPO> tags;
 
     /**
      * 关联分类
      */
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "category")
+    @ManyToMany(cascade = CascadeType.REMOVE)
+    @JoinTable(
+            name = "TODO_TASK_CATEGORY",
+            joinColumns = @JoinColumn(name = "task_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id", referencedColumnName = "id"))
     private List<CategoryPO> categories;
 }

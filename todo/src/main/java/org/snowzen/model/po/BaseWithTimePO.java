@@ -18,12 +18,12 @@ public abstract class BaseWithTimePO extends BasePO {
     /**
      * 创建时间
      */
-    @Column(name = "create_time")
+    @Column(name = "gmt_create")
     protected LocalDateTime createTime;
 
     /**
      * 更新时间
      */
-    @Column(name = "update_time")
-    protected LocalDateTime updateTime;
+    @Column(name = "gmt_modified")
+    protected LocalDateTime modifiedTime;
 }
