@@ -27,7 +27,7 @@ public class TagRepositoryTest {
             tagPO1.setName("测试标签");
 
             TagPO tagPO2 = new TagPO();
-            tagPO2.setName("测试标签");
+            BeanUtils.copyProperties(tagPO1, tagPO2);
 
             tagRepository.save(tagPO1);
             tagRepository.save(tagPO2);
