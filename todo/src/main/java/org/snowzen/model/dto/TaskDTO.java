@@ -17,6 +17,8 @@ public class TaskDTO {
 
     private String title;
 
+    private String content;
+
     private LocalDateTime finishTime;
 
     private Boolean active;
