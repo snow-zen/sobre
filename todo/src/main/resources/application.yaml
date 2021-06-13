@@ -1,0 +1,11 @@
+spring:
+  datasource:
+    username: root
+    password: zxj19991213
+    url: jdbc:mysql://47.98.131.150:3306/todo
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    generate-ddl: false
+    show-sql: true
+    open-in-view: false
+    database: mysql
