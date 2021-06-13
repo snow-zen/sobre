@@ -3,9 +3,10 @@ package org.snowzen.model.po;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import java.time.LocalDateTime;
-import java.util.List;
 
 /**
  * 任务实体类
@@ -42,23 +43,4 @@ public class TaskPO extends BaseWithTimePO {
     @Column(name = "is_active")
     private Boolean active;
 
-    /**
-     * 关联标签
-     */
-    @ManyToMany(cascade = CascadeType.REMOVE)
-    @JoinTable(
-            name = "TODO_TASK_TAG",
-            joinColumns = @JoinColumn(name = "task_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "tag_id", referencedColumnName = "id"))
-    private List<TagPO> tags;
-
-    /**
-     * 关联分类
-     */
-    @ManyToMany(cascade = CascadeType.REMOVE)
-    @JoinTable(
-            name = "TODO_TASK_CATEGORY",
-            joinColumns = @JoinColumn(name = "task_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "category_id", referencedColumnName = "id"))
-    private List<CategoryPO> categories;
 }
