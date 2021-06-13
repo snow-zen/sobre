@@ -4,8 +4,13 @@ spring:
     password: zxj19991213
     url: jdbc:mysql://47.98.131.150:3306/todo
     driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 1
   jpa:
     generate-ddl: false
     show-sql: true
     open-in-view: false
     database: mysql
+    hibernate:
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
