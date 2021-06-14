@@ -3,10 +3,13 @@ package org.snowzen.service;
 import org.snowzen.base.IdUtil;
 import org.snowzen.exception.NotFoundDataException;
 import org.snowzen.model.dto.CategoryDTO;
+import org.snowzen.model.po.CategoryPO;
 import org.snowzen.repository.dao.CategoryRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * 分类服务
@@ -34,5 +37,46 @@ public class CategoryService {
         return categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new NotFoundDataException("分类不存在"))
                 .convert();
+    }
+
+    /**
+     * 添加分类
+     *
+     * @param categoryDTO 分类DTO，不能为null
+     */
+    @Transactional
+    public void AddCategory(CategoryDTO categoryDTO) {
+        checkNotNull(categoryDTO);
+
+        categoryDTO.setId(null); // 添加前清除id，防止JPA识别为update操作
+        CategoryPO categoryPO = new CategoryPO();
+        categoryPO.reverse(categoryDTO);
+        categoryRepository.save(categoryPO);
+    }
+
+    /**
+     * 通过分类id判断分类是否存在
+     *
+     * @param categoryId 分类id
+     * @return 存在返回true，否则返回false
+     */
+    public boolean hasCategory(int categoryId) {
+        checkArgument(IdUtil.checkId(categoryId), "无效id");
+
+        return categoryRepository.existsById(categoryId);
+    }
+
+    /**
+     * 保证分类id对应分类必须存在
+     *
+     * @param categoryId 分类id
+     * @throws NotFoundDataException 不存在对应分类时抛出
+     */
+    public void ensureCategory(int categoryId) {
+        checkArgument(IdUtil.checkId(categoryId), "无效id");
+
+        if (!hasCategory(categoryId)) {
+            throw new NotFoundDataException("分类不存在");
+        }
     }
 }
