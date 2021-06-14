@@ -2,6 +2,7 @@ package org.snowzen.model.dto;
 
 import lombok.Data;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -11,7 +12,7 @@ import java.util.List;
  * @author snow-zen
  */
 @Data
-public class TaskDTO {
+public class TaskDTO implements Serializable {
 
     private Integer id;
 

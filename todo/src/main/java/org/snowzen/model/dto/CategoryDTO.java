@@ -2,6 +2,7 @@ package org.snowzen.model.dto;
 
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -10,7 +11,7 @@ import java.util.List;
  * @author snow-zen
  */
 @Data
-public class CategoryDTO {
+public class CategoryDTO implements Serializable {
 
     private Integer id;
 
