@@ -22,10 +22,16 @@ public class CategoryService {
         this.categoryRepository = categoryRepository;
     }
 
-    public CategoryDTO findById(int id) {
-        checkArgument(IdUtil.checkId(id), "无效id");
+    /**
+     * 通过id查询分类
+     *
+     * @param categoryId 分类id
+     * @return 查询结果对应的分类DTO
+     */
+    public CategoryDTO findCategoryById(int categoryId) {
+        checkArgument(IdUtil.checkId(categoryId), "无效id");
 
-        return categoryRepository.findById(id)
+        return categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new NotFoundDataException("分类不存在"))
                 .convert();
     }
