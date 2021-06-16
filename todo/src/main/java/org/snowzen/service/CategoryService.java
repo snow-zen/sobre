@@ -48,9 +48,9 @@ public class CategoryService {
     public void AddCategory(CategoryDTO categoryDTO) {
         checkNotNull(categoryDTO);
 
-        categoryDTO.setId(null); // 添加前清除id，防止JPA识别为update操作
         CategoryPO categoryPO = new CategoryPO();
         categoryPO.reverse(categoryDTO);
+        categoryPO.setId(null); // 添加前清除id，防止JPA识别为update操作
         categoryRepository.save(categoryPO);
     }
 
