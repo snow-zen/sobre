@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.snowzen.exception.NotFoundDataException;
 import org.snowzen.model.dto.CategoryDTO;
 import org.snowzen.model.po.CategoryPO;
 import org.snowzen.repository.dao.CategoryRepository;
@@ -54,14 +55,22 @@ public class CategoryServiceTest {
     }
 
     @Test
+    public void testFindCategoryByIdNotFound() {
+        when(categoryRepository.findById(1)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundDataException.class, () -> categoryService.findCategoryById(1));
+    }
+
+    @Test
     public void testAddCategory() {
         CategoryDTO categoryDTO = new CategoryDTO();
+        categoryDTO.setId(1);
         categoryDTO.setName("测试分类");
 
         when(categoryRepository.save(any(CategoryPO.class)))
                 .then(invocation -> invocation.getArgument(0, CategoryPO.class));
 
-        categoryService.AddCategory(categoryDTO);
+        assertDoesNotThrow(() -> categoryService.AddCategory(categoryDTO));
     }
 
     @Test
@@ -76,5 +85,12 @@ public class CategoryServiceTest {
         when(categoryRepository.existsById(1)).thenReturn(Boolean.TRUE);
 
         assertDoesNotThrow(() -> categoryService.ensureCategory(1));
+    }
+
+    @Test
+    public void testEnsureCategoryThrowException() {
+        when(categoryRepository.existsById(1)).thenReturn(Boolean.FALSE);
+
+        assertThrows(NotFoundDataException.class, () -> categoryService.ensureCategory(1));
     }
 }
