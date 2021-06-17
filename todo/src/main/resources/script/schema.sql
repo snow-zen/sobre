@@ -17,13 +17,14 @@ CREATE TABLE TODO_CATEGORY
 # 任务表
 CREATE TABLE TODO_TASK
 (
-    id           INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-    title        VARCHAR(100) NOT NULL COMMENT '任务标题',
-    content      TEXT COMMENT '任务内容',
-    finish_time  DATETIME COMMENT '任务预计完成时间',
-    is_active    TINYINT UNSIGNED COMMENT '任务是否启动',
-    gmt_create   DATETIME     NOT NULL DEFAULT NOW() COMMENT '任务创建时间',
-    gmt_modified DATETIME     NOT NULL DEFAULT NOW() COMMENT '任务更新时间',
+    id              INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+    title           VARCHAR(100) NOT NULL COMMENT '任务标题',
+    content         TEXT COMMENT '任务内容',
+    finish_time     DATETIME COMMENT '任务预计完成时间',
+    is_active       TINYINT UNSIGNED COMMENT '任务是否启动',
+    review_strategy VARCHAR(100) COMMENT '复习策略',
+    gmt_create      DATETIME     NOT NULL DEFAULT NOW() COMMENT '任务创建时间',
+    gmt_modified    DATETIME     NOT NULL DEFAULT NOW() COMMENT '任务更新时间',
     CONSTRAINT uk_title UNIQUE (title)
 );
 
