@@ -3,6 +3,7 @@ package org.snowzen.model.po;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.snowzen.model.Convertible;
+import org.snowzen.model.ReviewStrategy;
 import org.snowzen.model.dto.TaskDTO;
 import org.springframework.beans.BeanUtils;
 
@@ -45,6 +46,12 @@ public class TaskPO extends BaseWithTimePO implements Convertible<TaskDTO> {
      */
     @Column(name = "is_active")
     private Boolean active;
+
+    /**
+     * 复习策略
+     */
+    @Column(name = "review_strategy")
+    private ReviewStrategy reviewStrategy;
 
     @Override
     public void prePersistCallback() {

@@ -1,6 +1,7 @@
 package org.snowzen.model.dto;
 
 import lombok.Data;
+import org.snowzen.model.ReviewStrategy;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -23,6 +24,8 @@ public class TaskDTO implements Serializable {
     private LocalDateTime finishTime;
 
     private Boolean active;
+
+    private ReviewStrategy reviewStrategy;
 
     private LocalDateTime createTime;
 
