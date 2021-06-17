@@ -44,8 +44,8 @@ public class CategoryService {
      *
      * @param categoryDTO 分类DTO，不能为null
      */
-    @Transactional
-    public void AddCategory(CategoryDTO categoryDTO) {
+    @Transactional(rollbackFor = Exception.class)
+    public void addCategory(CategoryDTO categoryDTO) {
         checkNotNull(categoryDTO);
 
         CategoryPO categoryPO = new CategoryPO();

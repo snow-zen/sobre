@@ -70,7 +70,7 @@ public class CategoryServiceTest {
         when(categoryRepository.save(any(CategoryPO.class)))
                 .then(invocation -> invocation.getArgument(0, CategoryPO.class));
 
-        assertDoesNotThrow(() -> categoryService.AddCategory(categoryDTO));
+        assertDoesNotThrow(() -> categoryService.addCategory(categoryDTO));
     }
 
     @Test
