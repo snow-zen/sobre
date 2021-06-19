@@ -1,4 +1,4 @@
-package org.snowzen.model;
+package org.snowzen.review;
 
 /**
  * 复习策略

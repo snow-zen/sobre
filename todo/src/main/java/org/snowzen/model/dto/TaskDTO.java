@@ -1,7 +1,7 @@
 package org.snowzen.model.dto;
 
 import lombok.Data;
-import org.snowzen.model.ReviewStrategy;
+import org.snowzen.review.ReviewStrategy;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
