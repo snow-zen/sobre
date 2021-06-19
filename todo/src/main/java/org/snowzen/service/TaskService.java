@@ -19,7 +19,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import static com.google.common.base.Preconditions.*;
 
@@ -96,7 +95,7 @@ public class TaskService {
     public List<TaskDTO> findAllByCategoryId(int categoryId) {
         checkArgument(IdUtil.checkId(categoryId));
 
-        return StreamSupport.stream(taskRepository.findAllByCategoryId(categoryId).spliterator(), false)
+        return taskRepository.findAllByCategoryId(categoryId).stream()
                 .map(TaskPO::convert).collect(Collectors.toList());
     }
 

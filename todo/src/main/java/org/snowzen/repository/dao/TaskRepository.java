@@ -25,7 +25,7 @@ public interface TaskRepository extends JpaRepository<TaskPO, Integer> {
      */
     @Query(value = "SELECT TT.id AS id, title, content, finish_time, is_active, review_strategy, gmt_create, gmt_modified, TTC.id, task_id, category_id FROM TODO_TASK TT LEFT JOIN TODO_TASK_CATEGORY TTC on TT.id = TTC.task_id WHERE TT.id = :categoryId",
             nativeQuery = true)
-    Iterable<TaskPO> findAllByCategoryId(@Param("categoryId") int categoryId);
+    List<TaskPO> findAllByCategoryId(@Param("categoryId") int categoryId);
 
     /**
      * 通过关键字匹配对应任务
