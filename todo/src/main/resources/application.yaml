@@ -1,3 +1,7 @@
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.type.descriptor.sql.BasicBinder: trace
 spring:
   datasource:
     username: root
@@ -8,7 +12,6 @@ spring:
       maximum-pool-size: 1
   jpa:
     generate-ddl: false
-    show-sql: true
     open-in-view: false
     database: mysql
     hibernate:
