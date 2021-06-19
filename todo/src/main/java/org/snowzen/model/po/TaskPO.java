@@ -3,8 +3,8 @@ package org.snowzen.model.po;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.snowzen.model.Convertible;
-import org.snowzen.review.ReviewStrategy;
 import org.snowzen.model.dto.TaskDTO;
+import org.snowzen.review.ReviewStrategy;
 import org.springframework.beans.BeanUtils;
 
 import javax.persistence.Column;
