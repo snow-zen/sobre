@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -95,5 +96,26 @@ public class TaskRepositoryTest {
         assertNotNull(taskPOListFromDB);
         assertEquals(1, taskPOListFromDB.size());
         assertEquals(taskPOListFromDB.get(0), taskPO1);
+    }
+
+    @Test
+    public void testFindAllByFinishTimeBefore() {
+        LocalDateTime now = LocalDateTime.now();
+        TaskPO taskPO1 = new TaskPO();
+        taskPO1.setTitle("测试任务1");
+        taskPO1.setContent("测试任务内容");
+        taskPO1.setFinishTime(now.minusDays(1));
+
+        TaskPO taskPO2 = new TaskPO();
+        taskPO2.setTitle("测试任务2");
+        taskPO2.setContent("测试任务内容");
+        taskPO2.setFinishTime(now.plusDays(1));
+
+        taskRepository.saveAll(Arrays.asList(taskPO1, taskPO2));
+        List<TaskPO> taskPOList = taskRepository.findAllByFinishTimeBefore(now);
+
+        assertNotNull(taskPOList);
+        assertEquals(1, taskPOList.size());
+        assertEquals(taskPOList.get(0), taskPO1);
     }
 }
