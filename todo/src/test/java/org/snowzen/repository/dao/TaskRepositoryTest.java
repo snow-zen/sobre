@@ -15,8 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author snow-zen
@@ -76,5 +75,25 @@ public class TaskRepositoryTest {
 
         List<TaskPO> taskPOListFromDB = taskRepository.findAllByCategoryId(categoryId);
         assertEquals(taskPOList, taskPOListFromDB);
+    }
+
+    @Test
+    public void testFindAllTitleLike() {
+        String key = "测试";
+
+        TaskPO taskPO1 = new TaskPO();
+        taskPO1.setTitle("测试任务");
+        taskPO1.setContent("测试任务内容");
+
+        TaskPO taskPO2 = new TaskPO();
+        taskPO2.setTitle("任务");
+        taskPO2.setContent("测试任务内容");
+
+        taskRepository.saveAll(Arrays.asList(taskPO1, taskPO2));
+        List<TaskPO> taskPOListFromDB = taskRepository.findAllByTitleContaining(key);
+
+        assertNotNull(taskPOListFromDB);
+        assertEquals(1, taskPOListFromDB.size());
+        assertEquals(taskPOListFromDB.get(0), taskPO1);
     }
 }
