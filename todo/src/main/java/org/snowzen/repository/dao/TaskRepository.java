@@ -33,7 +33,7 @@ public interface TaskRepository extends JpaRepository<TaskPO, Integer> {
      * @param key 关键字
      * @return 匹配到的任务列表
      */
-    List<TaskPO> findAllByTitleLike(String key);
+    List<TaskPO> findAllByTitleContaining(String key);
 
     /**
      * 查询复习时间在指定时间前的任务

@@ -110,7 +110,7 @@ public class TaskService {
 
         List<TaskPO> result = !StringUtils.hasText(key) ?
                 taskRepository.findAll() :
-                taskRepository.findAllByTitleLike(key);
+                taskRepository.findAllByTitleContaining(key);
 
         return result.stream().map(TaskPO::convert).collect(Collectors.toList());
     }
