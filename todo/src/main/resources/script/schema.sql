@@ -33,7 +33,8 @@ CREATE TABLE TODO_TASK_TAG
 (
     id      INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
     task_id INT UNSIGNED,
-    tag_id  INT UNSIGNED
+    tag_id  INT UNSIGNED,
+    CONSTRAINT uk_task_tag_id UNIQUE (task_id, tag_id)
 ) COMMENT '任务-标签中间表';
 
 # 任务-类型中间表
@@ -41,5 +42,6 @@ CREATE TABLE TODO_TASK_CATEGORY
 (
     id          INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
     task_id     INT UNSIGNED,
-    category_id INT UNSIGNED
+    category_id INT UNSIGNED,
+    CONSTRAINT uk_task_category_id UNIQUE (task_id, category_id)
 ) COMMENT '任务-类型中间表';
