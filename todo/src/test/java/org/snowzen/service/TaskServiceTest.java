@@ -194,4 +194,21 @@ public class TaskServiceTest {
         assertEquals(2, taskDTOList.size());
         assertEquals(Stream.of(taskPO1, taskPO2).map(TaskPO::convert).collect(Collectors.toList()), taskDTOList);
     }
+
+    @Test
+    public void testFindAllNeedReview() {
+        TaskPO taskPO1 = new TaskPO();
+        taskPO1.setId(1);
+        taskPO1.setTitle("测试任务");
+        taskPO1.setContent("测试内容");
+        taskPO1.setFinishTime(LocalDateTime.of(2021, 1, 1, 0, 0));
+
+        when(taskRepository.findAllByFinishTimeBefore(any())).thenReturn(Collections.singletonList(taskPO1));
+
+        List<TaskDTO> taskDTOList = taskService.findAllNeedReview();
+
+        assertFalse(CollectionUtils.isEmpty(taskDTOList));
+        assertEquals(1, taskDTOList.size());
+        assertEquals(taskPO1.convert(), taskDTOList.get(0));
+    }
 }
