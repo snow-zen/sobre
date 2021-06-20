@@ -62,16 +62,15 @@ public class TaskService {
         Integer taskId = taskPO.getId();
         // 标签关联关系保存
         List<TagTaskRelationPO> tagTaskRelationPOList = fetchTagTaskRelation(taskDTO);
-        tagTaskRelationRepository.saveAll(tagTaskRelationPOList);
+        if (!CollectionUtils.isEmpty(tagTaskRelationPOList)) {
+            tagTaskRelationRepository.saveAll(tagTaskRelationPOList);
+        }
 
         // 分类关联关系保存
-        List<CategoryTaskRelationPO> categoryTaskRelationPOList = taskDTO.getCategories().stream().map(categoryDTO -> {
-            CategoryTaskRelationPO categoryTaskRelationPO = new CategoryTaskRelationPO();
-            categoryTaskRelationPO.setTaskId(taskId);
-            categoryTaskRelationPO.setCategoryId(categoryDTO.getId());
-            return categoryTaskRelationPO;
-        }).collect(Collectors.toList());
-        categoryTaskRelationRepository.saveAll(categoryTaskRelationPOList);
+        List<CategoryTaskRelationPO> categoryTaskRelationPOList = fetchCategoryTaskRelation(taskDTO);
+        if (!CollectionUtils.isEmpty(categoryTaskRelationPOList)) {
+            categoryTaskRelationRepository.saveAll(categoryTaskRelationPOList);
+        }
     }
 
     /**
