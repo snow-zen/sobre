@@ -59,7 +59,7 @@ public class TaskService {
         // 任务保存
         taskPO = taskRepository.save(taskPO);
 
-        Integer taskId = taskPO.getId();
+        taskDTO.setId(taskPO.getId());
         // 标签关联关系保存
         List<TagTaskRelationPO> tagTaskRelationPOList = fetchTagTaskRelation(taskDTO);
         if (!CollectionUtils.isEmpty(tagTaskRelationPOList)) {
@@ -224,6 +224,7 @@ public class TaskService {
      * 从{@link TaskDTO}提取标签关联关系
      */
     private List<TagTaskRelationPO> fetchTagTaskRelation(TaskDTO taskDTO) {
+        checkArgument(IdUtil.checkId(taskDTO.getId()));
         Integer taskId = taskDTO.getId();
         return Optional.ofNullable(taskDTO.getTags())
                 .orElse(Collections.emptyList())
@@ -240,6 +241,7 @@ public class TaskService {
      * 从{@link TaskDTO}提取分类关联关系
      */
     private List<CategoryTaskRelationPO> fetchCategoryTaskRelation(TaskDTO taskDTO) {
+        checkArgument(IdUtil.checkId(taskDTO.getId()));
         Integer taskId = taskDTO.getId();
         return Optional.ofNullable(taskDTO.getCategories())
                 .orElse(Collections.emptyList())
