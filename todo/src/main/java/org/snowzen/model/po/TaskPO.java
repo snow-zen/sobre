@@ -56,7 +56,9 @@ public class TaskPO extends BaseWithTimePO implements Convertible<TaskDTO> {
     @Override
     public void prePersistCallback() {
         super.prePersistCallback();
-        active = Boolean.TRUE;
+        if (active == null) {
+            active = Boolean.TRUE;
+        }
     }
 
     @Override
