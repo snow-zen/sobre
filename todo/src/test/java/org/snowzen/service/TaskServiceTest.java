@@ -18,14 +18,17 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -124,5 +127,71 @@ public class TaskServiceTest {
         when(taskRepository.findById(1)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundDataException.class, () -> taskService.findTask(1));
+    }
+
+    @Test
+    public void testFindAllByCategoryId() {
+        TaskPO taskPO = new TaskPO();
+        taskPO.setId(1);
+        taskPO.setTitle("测试任务");
+        taskPO.setContent("测试任务内容");
+        taskPO.setFinishTime(LocalDateTime.now());
+        taskPO.setReviewStrategy(ReviewStrategy.EVERY_DAY);
+        taskPO.setCreateTime(LocalDateTime.now());
+        taskPO.setModifiedTime(LocalDateTime.now());
+
+        when(taskRepository.findAllByCategoryId(1)).thenReturn(Collections.singletonList(taskPO));
+
+        List<TaskDTO> taskDTOList = taskService.findAllByCategoryId(1);
+
+        assertFalse(CollectionUtils.isEmpty(taskDTOList));
+        assertEquals(1, taskDTOList.size());
+        assertEquals(taskPO.convert(), taskDTOList.get(0));
+    }
+
+    @Test
+    public void testFindAllByKey() {
+        String key = "测试";
+
+        TaskPO taskPO1 = new TaskPO();
+        taskPO1.setId(1);
+        taskPO1.setTitle("测试任务");
+        taskPO1.setContent("测试内容");
+
+        TaskPO taskPO2 = new TaskPO();
+        taskPO2.setId(2);
+        taskPO2.setTitle("任务");
+        taskPO2.setContent("测试内容");
+
+        when(taskRepository.findAllByTitleContaining(key)).thenReturn(Collections.singletonList(taskPO1));
+
+        List<TaskDTO> taskDTOList = taskService.findAllByKey(key);
+
+        assertFalse(CollectionUtils.isEmpty(taskDTOList));
+        assertEquals(1, taskDTOList.size());
+        assertEquals(taskPO1.convert(), taskDTOList.get(0));
+    }
+
+    @Test
+    public void testFindAllByKeyUsingEmptyKey() {
+        String key = "";
+
+        TaskPO taskPO1 = new TaskPO();
+        taskPO1.setId(1);
+        taskPO1.setTitle("测试任务");
+        taskPO1.setContent("测试内容");
+
+        TaskPO taskPO2 = new TaskPO();
+        taskPO2.setId(2);
+        taskPO2.setTitle("任务");
+        taskPO2.setContent("测试内容");
+
+        when(taskRepository.findAll()).thenReturn(Arrays.asList(taskPO1, taskPO2));
+
+        List<TaskDTO> taskDTOList = taskService.findAllByKey(key);
+
+        assertFalse(CollectionUtils.isEmpty(taskDTOList));
+        assertEquals(2, taskDTOList.size());
+        assertEquals(Stream.of(taskPO1, taskPO2).map(TaskPO::convert).collect(Collectors.toList()), taskDTOList);
     }
 }
