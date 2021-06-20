@@ -17,7 +17,9 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.*;
@@ -224,12 +226,15 @@ public class TaskService {
      */
     private List<TagTaskRelationPO> fetchTagTaskRelation(TaskDTO taskDTO) {
         Integer taskId = taskDTO.getId();
-        return taskDTO.getTags().stream().map(tagDTO -> {
-            TagTaskRelationPO tagTaskRelationPO = new TagTaskRelationPO();
-            tagTaskRelationPO.setTaskId(taskId);
-            tagTaskRelationPO.setTagId(tagDTO.getId());
-            return tagTaskRelationPO;
-        }).collect(Collectors.toList());
+        return Optional.ofNullable(taskDTO.getTags())
+                .orElse(Collections.emptyList())
+                .stream()
+                .map(tagDTO -> {
+                    TagTaskRelationPO tagTaskRelationPO = new TagTaskRelationPO();
+                    tagTaskRelationPO.setTaskId(taskId);
+                    tagTaskRelationPO.setTagId(tagDTO.getId());
+                    return tagTaskRelationPO;
+                }).collect(Collectors.toList());
     }
 
     /**
@@ -237,11 +242,14 @@ public class TaskService {
      */
     private List<CategoryTaskRelationPO> fetchCategoryTaskRelation(TaskDTO taskDTO) {
         Integer taskId = taskDTO.getId();
-        return taskDTO.getCategories().stream().map(categoryDTO -> {
-            CategoryTaskRelationPO categoryTaskRelationPO = new CategoryTaskRelationPO();
-            categoryTaskRelationPO.setTaskId(taskId);
-            categoryTaskRelationPO.setCategoryId(categoryDTO.getId());
-            return categoryTaskRelationPO;
-        }).collect(Collectors.toList());
+        return Optional.ofNullable(taskDTO.getCategories())
+                .orElse(Collections.emptyList())
+                .stream()
+                .map(categoryDTO -> {
+                    CategoryTaskRelationPO categoryTaskRelationPO = new CategoryTaskRelationPO();
+                    categoryTaskRelationPO.setTaskId(taskId);
+                    categoryTaskRelationPO.setCategoryId(categoryDTO.getId());
+                    return categoryTaskRelationPO;
+                }).collect(Collectors.toList());
     }
 }
