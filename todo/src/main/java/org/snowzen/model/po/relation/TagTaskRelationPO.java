@@ -2,6 +2,7 @@ package org.snowzen.model.po.relation;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import org.snowzen.model.po.BasePO;
 
 import javax.persistence.Column;
@@ -17,6 +18,7 @@ import javax.persistence.Table;
 @Entity
 @Data
 @EqualsAndHashCode(callSuper = false)
+@NoArgsConstructor
 public class TagTaskRelationPO extends BasePO {
 
     /**
@@ -30,4 +32,9 @@ public class TagTaskRelationPO extends BasePO {
      */
     @Column(name = "tag_id")
     private Integer tagId;
+
+    public TagTaskRelationPO(Integer taskId, Integer tagId) {
+        this.taskId = taskId;
+        this.tagId = tagId;
+    }
 }
