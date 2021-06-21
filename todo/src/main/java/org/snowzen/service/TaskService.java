@@ -165,7 +165,7 @@ public class TaskService {
     public void modify(TaskDTO taskDTO) {
         checkNotNull(taskDTO);
         checkArgument(IdUtil.checkId(taskDTO.getId()));
-        checkState(taskRepository.existsById(taskDTO.getId()));
+        checkState(taskRepository.existsById(taskDTO.getId()), "任务不存在");
 
         // 保存任务
         TaskPO taskPO = new TaskPO();
