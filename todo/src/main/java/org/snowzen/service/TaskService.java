@@ -139,6 +139,13 @@ public class TaskService {
 
         TaskPO taskPO = taskRepository.findById(taskId)
                 .orElseThrow(() -> new NotFoundDataException("任务不存在"));
+        Boolean active = Optional.ofNullable(taskPO.getActive()).orElse(Boolean.FALSE);
+
+        if (!active) {
+            // TODO 考虑抛出异常提示
+            return;
+        }
+
         LocalDateTime nextReviewTime = ReviewTimeUtil.nextReviewTime(taskPO.getFinishTime(), taskPO.getReviewStrategy());
 
         if (nextReviewTime == null) {
