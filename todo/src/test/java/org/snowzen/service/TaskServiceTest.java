@@ -10,6 +10,8 @@ import org.snowzen.model.dto.CategoryDTO;
 import org.snowzen.model.dto.TagDTO;
 import org.snowzen.model.dto.TaskDTO;
 import org.snowzen.model.po.TaskPO;
+import org.snowzen.model.po.relation.CategoryTaskRelationPO;
+import org.snowzen.model.po.relation.TagTaskRelationPO;
 import org.snowzen.repository.dao.TaskRepository;
 import org.snowzen.repository.dao.relation.CategoryTaskRelationRepository;
 import org.snowzen.repository.dao.relation.TagTaskRelationRepository;
@@ -30,7 +32,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author snow-zen
@@ -245,5 +247,52 @@ public class TaskServiceTest {
         taskService.finishReview(1);
 
         assertFalse(taskPO.getActive());
+    }
+
+    @Test
+    public void testModify() {
+        CategoryDTO categoryDTO1 = new CategoryDTO();
+        categoryDTO1.setId(1);
+        categoryDTO1.setName("测试分类1");
+
+        CategoryDTO categoryDTO2 = new CategoryDTO();
+        categoryDTO2.setId(2);
+        categoryDTO2.setName("测试分类2");
+
+        TagDTO tagDTO1 = new TagDTO();
+        tagDTO1.setId(1);
+        tagDTO1.setName("测试标签1");
+
+        TagDTO tagDTO2 = new TagDTO();
+        tagDTO2.setId(2);
+        tagDTO2.setName("测试标签2");
+
+        TaskDTO taskDTO = new TaskDTO();
+        taskDTO.setId(1);
+        taskDTO.setTitle("测试任务");
+        taskDTO.setContent("测试内容");
+        taskDTO.setCategories(Arrays.asList(categoryDTO1, categoryDTO2));
+        taskDTO.setTags(Arrays.asList(tagDTO1, tagDTO2));
+
+        List<TagTaskRelationPO> tagTaskRelationPOList = Arrays.asList(
+                new TagTaskRelationPO(1, 1),
+                new TagTaskRelationPO(1, 3)
+        );
+
+        List<CategoryTaskRelationPO> categoryTaskRelationPOList = Arrays.asList(
+                new CategoryTaskRelationPO(1, 1),
+                new CategoryTaskRelationPO(1, 3)
+        );
+
+        when(taskRepository.existsById(1)).thenReturn(Boolean.TRUE);
+        when(taskRepository.save(any(TaskPO.class))).then(invocation -> invocation.getArgument(0, TaskPO.class));
+        when(tagTaskRelationRepository.findAllByTaskId(1)).thenReturn(tagTaskRelationPOList);
+        doNothing().when(tagTaskRelationRepository).deleteAll(any());
+        when(tagTaskRelationRepository.saveAll(any())).then(invocation -> invocation.getArgument(0, List.class));
+        when(categoryTaskRelationRepository.findAllByTaskId(1)).thenReturn(categoryTaskRelationPOList);
+        doNothing().when(categoryTaskRelationRepository).deleteAll(any());
+        when(categoryTaskRelationRepository.saveAll(any())).then(invocation -> invocation.getArgument(0, List.class));
+
+        taskService.modify(taskDTO);
     }
 }
