@@ -211,4 +211,39 @@ public class TaskServiceTest {
         assertEquals(1, taskDTOList.size());
         assertEquals(taskPO1.convert(), taskDTOList.get(0));
     }
+
+    @Test
+    public void testFinishReviewChangeFinishTime() {
+        LocalDateTime now = LocalDateTime.now();
+        TaskPO taskPO = new TaskPO();
+        taskPO.setId(1);
+        taskPO.setTitle("测试任务");
+        taskPO.setContent("测试内容");
+        taskPO.setFinishTime(now);
+        taskPO.setReviewStrategy(ReviewStrategy.EVERY_DAY);
+        taskPO.setActive(Boolean.TRUE);
+
+        when(taskRepository.findById(1)).thenReturn(Optional.of(taskPO));
+        when(taskRepository.save(any(TaskPO.class))).thenReturn(taskPO);
+
+        taskService.finishReview(1);
+
+        assertNotEquals(now, taskPO.getFinishTime());
+    }
+
+    @Test
+    public void testFinishReviewSetActive() {
+        TaskPO taskPO = new TaskPO();
+        taskPO.setId(1);
+        taskPO.setTitle("测试任务");
+        taskPO.setContent("测试内容");
+        taskPO.setActive(Boolean.TRUE);
+
+        when(taskRepository.findById(1)).thenReturn(Optional.of(taskPO));
+        when(taskRepository.save(any(TaskPO.class))).thenReturn(taskPO);
+
+        taskService.finishReview(1);
+
+        assertFalse(taskPO.getActive());
+    }
 }
