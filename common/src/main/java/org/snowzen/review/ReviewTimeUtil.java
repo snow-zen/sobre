@@ -8,6 +8,9 @@ import java.time.LocalDateTime;
 public class ReviewTimeUtil {
 
     public static LocalDateTime nextReviewTime(LocalDateTime preReviewTime, ReviewStrategy reviewStrategy) {
+        if (preReviewTime == null) {
+            return null;
+        }
         LocalDateTime next = null;
         if (reviewStrategy == ReviewStrategy.EVERY_DAY) {
             next = preReviewTime.plusDays(1);
