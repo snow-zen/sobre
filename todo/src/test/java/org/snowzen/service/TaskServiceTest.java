@@ -293,6 +293,16 @@ public class TaskServiceTest {
         doNothing().when(categoryTaskRelationRepository).deleteAll(any());
         when(categoryTaskRelationRepository.saveAll(any())).then(invocation -> invocation.getArgument(0, List.class));
 
-        taskService.modify(taskDTO);
+        assertDoesNotThrow(() -> taskService.modify(taskDTO));
+    }
+
+    @Test
+    public void testDelete() {
+        when(taskRepository.existsById(1)).thenReturn(Boolean.TRUE);
+        doNothing().when(taskRepository).deleteById(1);
+        doNothing().when(tagTaskRelationRepository).deleteAllByTaskId(1);
+        doNothing().when(categoryTaskRelationRepository).deleteAllByTaskId(1);
+
+        assertDoesNotThrow(() -> taskService.delete(1));
     }
 }
