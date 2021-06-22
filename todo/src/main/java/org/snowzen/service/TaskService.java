@@ -222,6 +222,9 @@ public class TaskService {
     public void delete(int taskId) {
         checkArgument(IdUtil.checkId(taskId));
 
+        if (!taskRepository.existsById(taskId)) {
+            return;
+        }
         taskRepository.deleteById(taskId);
         tagTaskRelationRepository.deleteAllByTaskId(taskId);
         categoryTaskRelationRepository.deleteAllByTaskId(taskId);
