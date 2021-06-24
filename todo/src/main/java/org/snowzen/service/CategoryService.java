@@ -2,6 +2,7 @@ package org.snowzen.service;
 
 import org.snowzen.base.IdUtil;
 import org.snowzen.exception.NotFoundDataException;
+import org.snowzen.model.assembler.CategoryAssembler;
 import org.snowzen.model.dto.CategoryDTO;
 import org.snowzen.model.po.CategoryPO;
 import org.snowzen.repository.dao.CategoryRepository;
@@ -20,9 +21,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final CategoryAssembler categoryAssembler;
 
-    public CategoryService(CategoryRepository categoryRepository) {
+    public CategoryService(CategoryRepository categoryRepository, CategoryAssembler categoryAssembler) {
         this.categoryRepository = categoryRepository;
+        this.categoryAssembler = categoryAssembler;
     }
 
     /**
@@ -34,9 +37,10 @@ public class CategoryService {
     public CategoryDTO findCategoryById(int categoryId) {
         checkArgument(IdUtil.checkId(categoryId), "无效id");
 
-        return categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new NotFoundDataException("分类不存在"))
-                .convert();
+        CategoryPO categoryPO = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new NotFoundDataException("分类不存在"));
+
+        return categoryAssembler.PO2DTO(categoryPO);
     }
 
     /**
@@ -48,9 +52,9 @@ public class CategoryService {
     public void addCategory(CategoryDTO categoryDTO) {
         checkNotNull(categoryDTO);
 
-        CategoryPO categoryPO = new CategoryPO();
-        categoryPO.reverse(categoryDTO);
-        categoryPO.setId(null); // 添加前清除id，防止JPA识别为update操作
+        CategoryPO categoryPO = categoryAssembler.DTO2PO(categoryDTO);
+        // 添加前清除id，防止JPA识别为update操作
+        categoryPO.setId(null);
         categoryRepository.save(categoryPO);
     }
 
