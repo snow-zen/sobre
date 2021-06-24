@@ -3,9 +3,11 @@ package org.snowzen.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.snowzen.exception.NotFoundDataException;
+import org.snowzen.model.assembler.CategoryAssembler;
 import org.snowzen.model.dto.CategoryDTO;
 import org.snowzen.model.po.CategoryPO;
 import org.snowzen.repository.dao.CategoryRepository;
@@ -23,6 +25,7 @@ import static org.mockito.Mockito.when;
 /**
  * @author snow-zen
  */
+@SuppressWarnings("WrongUsageOfMappersFactory")
 @ExtendWith(MockitoExtension.class)
 @WebAppConfiguration
 @ContextConfiguration(classes = MockServletContext.class)
@@ -31,12 +34,15 @@ public class CategoryServiceTest {
 
     private CategoryService categoryService;
 
+    private CategoryAssembler categoryAssembler;
+
     @Mock
     private CategoryRepository categoryRepository;
 
     @BeforeEach
     public void before() {
-        categoryService = new CategoryService(categoryRepository);
+        categoryAssembler = Mappers.getMapper(CategoryAssembler.class);
+        categoryService = new CategoryService(categoryRepository, categoryAssembler);
     }
 
     @Test
@@ -45,8 +51,7 @@ public class CategoryServiceTest {
         categoryDTO.setId(1);
         categoryDTO.setName("测试分类");
 
-        CategoryPO categoryPO = new CategoryPO();
-        categoryPO.reverse(categoryDTO);
+        CategoryPO categoryPO = categoryAssembler.DTO2PO(categoryDTO);
 
         when(categoryRepository.findById(1))
                 .thenReturn(Optional.of(categoryPO));
