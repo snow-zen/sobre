@@ -1,15 +1,20 @@
+# 日志打印
 logging:
   level:
     org.hibernate.SQL: debug
     org.hibernate.type.descriptor.sql.BasicBinder: trace
+
 spring:
+  # 数据库配置
   datasource:
     username: root
     password: zxj19991213
     url: jdbc:mysql://47.98.131.150:3306/todo
     driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.zaxxer.hikari.HikariDataSource
     hikari:
       maximum-pool-size: 1
+  # JPA配置
   jpa:
     generate-ddl: false
     open-in-view: false
@@ -17,3 +22,11 @@ spring:
     hibernate:
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+
+# actuator配置
+management:
+  endpoints:
+    web:
+      base-path: /manager
+      exposure:
+        include: "*"
