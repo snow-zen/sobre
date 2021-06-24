@@ -3,9 +3,11 @@ package org.snowzen.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.snowzen.exception.NotFoundDataException;
+import org.snowzen.model.assembler.TaskAssembler;
 import org.snowzen.model.dto.CategoryDTO;
 import org.snowzen.model.dto.TagDTO;
 import org.snowzen.model.dto.TaskDTO;
@@ -32,11 +34,13 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 
 /**
  * @author snow-zen
  */
+@SuppressWarnings("WrongUsageOfMappersFactory")
 @ExtendWith(MockitoExtension.class)
 @WebAppConfiguration
 @ContextConfiguration(classes = MockServletContext.class)
@@ -44,6 +48,8 @@ import static org.mockito.Mockito.*;
 public class TaskServiceTest {
 
     private TaskService taskService;
+
+    private TaskAssembler taskAssembler;
 
     @Mock
     private TaskRepository taskRepository;
@@ -56,7 +62,8 @@ public class TaskServiceTest {
 
     @BeforeEach
     public void createService() {
-        taskService = new TaskService(taskRepository, tagTaskRelationRepository, categoryTaskRelationRepository);
+        taskAssembler = Mappers.getMapper(TaskAssembler.class);
+        taskService = new TaskService(taskRepository, tagTaskRelationRepository, categoryTaskRelationRepository, taskAssembler);
     }
 
     @Test
@@ -121,7 +128,7 @@ public class TaskServiceTest {
         when(taskRepository.findById(1)).thenReturn(Optional.of(taskPO));
 
         TaskDTO taskDTO = taskService.findTask(1);
-        assertEquals(taskPO.convert(), taskDTO);
+        assertEquals(taskAssembler.PO2DTO(taskPO), taskDTO);
     }
 
     @Test
@@ -148,7 +155,7 @@ public class TaskServiceTest {
 
         assertFalse(CollectionUtils.isEmpty(taskDTOList));
         assertEquals(1, taskDTOList.size());
-        assertEquals(taskPO.convert(), taskDTOList.get(0));
+        assertEquals(taskAssembler.PO2DTO(taskPO), taskDTOList.get(0));
     }
 
     @Test
@@ -171,7 +178,7 @@ public class TaskServiceTest {
 
         assertFalse(CollectionUtils.isEmpty(taskDTOList));
         assertEquals(1, taskDTOList.size());
-        assertEquals(taskPO1.convert(), taskDTOList.get(0));
+        assertEquals(taskAssembler.PO2DTO(taskPO1), taskDTOList.get(0));
     }
 
     @Test
@@ -194,7 +201,7 @@ public class TaskServiceTest {
 
         assertFalse(CollectionUtils.isEmpty(taskDTOList));
         assertEquals(2, taskDTOList.size());
-        assertEquals(Stream.of(taskPO1, taskPO2).map(TaskPO::convert).collect(Collectors.toList()), taskDTOList);
+        assertEquals(Stream.of(taskPO1, taskPO2).map(taskAssembler::PO2DTO).collect(Collectors.toList()), taskDTOList);
     }
 
     @Test
@@ -211,7 +218,7 @@ public class TaskServiceTest {
 
         assertFalse(CollectionUtils.isEmpty(taskDTOList));
         assertEquals(1, taskDTOList.size());
-        assertEquals(taskPO1.convert(), taskDTOList.get(0));
+        assertEquals(taskAssembler.PO2DTO(taskPO1), taskDTOList.get(0));
     }
 
     @Test
