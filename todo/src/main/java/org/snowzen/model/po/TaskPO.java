@@ -2,10 +2,7 @@ package org.snowzen.model.po;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.snowzen.model.Convertible;
-import org.snowzen.model.dto.TaskDTO;
 import org.snowzen.review.ReviewStrategy;
-import org.springframework.beans.BeanUtils;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -21,7 +18,7 @@ import java.time.LocalDateTime;
 @Entity
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class TaskPO extends BaseWithTimePO implements Convertible<TaskDTO> {
+public class TaskPO extends BaseWithTimePO {
 
     /**
      * 标题
@@ -61,15 +58,4 @@ public class TaskPO extends BaseWithTimePO implements Convertible<TaskDTO> {
         }
     }
 
-    @Override
-    public TaskDTO convert() {
-        TaskDTO taskDTO = new TaskDTO();
-        BeanUtils.copyProperties(this, taskDTO);
-        return taskDTO;
-    }
-
-    @Override
-    public void reverse(TaskDTO taskDTO) {
-        BeanUtils.copyProperties(taskDTO, this);
-    }
 }

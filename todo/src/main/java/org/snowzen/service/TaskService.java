@@ -2,6 +2,7 @@ package org.snowzen.service;
 
 import org.snowzen.base.IdUtil;
 import org.snowzen.exception.NotFoundDataException;
+import org.snowzen.model.assembler.TaskAssembler;
 import org.snowzen.model.dto.TaskDTO;
 import org.snowzen.model.po.TaskPO;
 import org.snowzen.model.po.relation.CategoryTaskRelationPO;
@@ -38,10 +39,13 @@ public class TaskService {
 
     private final CategoryTaskRelationRepository categoryTaskRelationRepository;
 
-    public TaskService(TaskRepository taskRepository, TagTaskRelationRepository tagTaskRelationRepository, CategoryTaskRelationRepository categoryTaskRelationRepository) {
+    private final TaskAssembler taskAssembler;
+
+    public TaskService(TaskRepository taskRepository, TagTaskRelationRepository tagTaskRelationRepository, CategoryTaskRelationRepository categoryTaskRelationRepository, TaskAssembler taskAssembler) {
         this.taskRepository = taskRepository;
         this.tagTaskRelationRepository = tagTaskRelationRepository;
         this.categoryTaskRelationRepository = categoryTaskRelationRepository;
+        this.taskAssembler = taskAssembler;
     }
 
     /**
@@ -54,8 +58,7 @@ public class TaskService {
         checkNotNull(taskDTO);
 
         taskDTO.setId(null);
-        TaskPO taskPO = new TaskPO();
-        taskPO.reverse(taskDTO);
+        TaskPO taskPO = taskAssembler.DTO2PO(taskDTO);
         // 任务保存
         taskPO = taskRepository.save(taskPO);
 
@@ -82,9 +85,10 @@ public class TaskService {
     public TaskDTO findTask(int taskId) {
         checkArgument(IdUtil.checkId(taskId));
 
-        return taskRepository.findById(taskId)
-                .orElseThrow(() -> new NotFoundDataException("任务不存在"))
-                .convert();
+        TaskPO taskPO = taskRepository.findById(taskId)
+                .orElseThrow(() -> new NotFoundDataException("任务不存在"));
+
+        return taskAssembler.PO2DTO(taskPO);
     }
 
     /**
@@ -97,7 +101,7 @@ public class TaskService {
         checkArgument(IdUtil.checkId(categoryId));
 
         return taskRepository.findAllByCategoryId(categoryId).stream()
-                .map(TaskPO::convert).collect(Collectors.toList());
+                .map(taskAssembler::PO2DTO).collect(Collectors.toList());
     }
 
     /**
@@ -113,7 +117,7 @@ public class TaskService {
                 taskRepository.findAll() :
                 taskRepository.findAllByTitleContaining(key);
 
-        return result.stream().map(TaskPO::convert).collect(Collectors.toList());
+        return result.stream().map(taskAssembler::PO2DTO).collect(Collectors.toList());
     }
 
     /**
@@ -125,7 +129,7 @@ public class TaskService {
         LocalDateTime now = LocalDateTime.now();
 
         List<TaskPO> taskPOList = taskRepository.findAllByFinishTimeBefore(now);
-        return taskPOList.stream().map(TaskPO::convert).collect(Collectors.toList());
+        return taskPOList.stream().map(taskAssembler::PO2DTO).collect(Collectors.toList());
     }
 
     /**
@@ -168,8 +172,7 @@ public class TaskService {
         checkState(taskRepository.existsById(taskDTO.getId()), "任务不存在");
 
         // 保存任务
-        TaskPO taskPO = new TaskPO();
-        taskPO.reverse(taskDTO);
+        TaskPO taskPO = taskAssembler.DTO2PO(taskDTO);
         taskRepository.save(taskPO);
 
         Integer taskId = taskDTO.getId();
