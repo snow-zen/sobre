@@ -145,10 +145,7 @@ public class TaskService {
                 .orElseThrow(() -> new NotFoundDataException("任务不存在"));
         Boolean active = Optional.ofNullable(taskPO.getActive()).orElse(Boolean.FALSE);
 
-        if (!active) {
-            // TODO 考虑抛出异常提示
-            return;
-        }
+        checkState(active, "任务已停止活动，请选择其他活动");
 
         LocalDateTime nextReviewTime = ReviewTimeUtil.nextReviewTime(taskPO.getFinishTime(), taskPO.getReviewStrategy());
 
@@ -238,6 +235,7 @@ public class TaskService {
      */
     private List<TagTaskRelationPO> fetchTagTaskRelation(TaskDTO taskDTO) {
         checkArgument(IdUtil.checkId(taskDTO.getId()));
+
         Integer taskId = taskDTO.getId();
         return Optional.ofNullable(taskDTO.getTags())
                 .orElse(Collections.emptyList())
@@ -255,6 +253,7 @@ public class TaskService {
      */
     private List<CategoryTaskRelationPO> fetchCategoryTaskRelation(TaskDTO taskDTO) {
         checkArgument(IdUtil.checkId(taskDTO.getId()));
+
         Integer taskId = taskDTO.getId();
         return Optional.ofNullable(taskDTO.getCategories())
                 .orElse(Collections.emptyList())
