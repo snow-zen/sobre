@@ -1,7 +1,6 @@
 package org.snowzen.model.dto;
 
 import lombok.Data;
-import org.snowzen.support.validation.ValidGroup;
 import org.snowzen.support.validation.constraints.ValidId;
 
 import javax.validation.constraints.NotBlank;
@@ -16,7 +15,7 @@ import java.util.List;
 @Data
 public class CategoryDTO implements Serializable {
 
-    @ValidId(groups = ValidGroup.AddGroup.class)
+    @ValidId
     private Integer id;
 
     @NotBlank
