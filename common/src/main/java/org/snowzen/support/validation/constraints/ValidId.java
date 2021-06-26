@@ -1,5 +1,6 @@
 package org.snowzen.support.validation.constraints;
 
+import org.snowzen.support.validation.ValidGroup;
 import org.snowzen.support.validation.validator.IdConstraintValidator;
 
 import javax.validation.Constraint;
@@ -17,7 +18,7 @@ public @interface ValidId {
 
     String message() default "{org.snowzen.todo.valid.ValidId.message}";
 
-    Class<?>[] groups() default {};
+    Class<?>[] groups() default ValidGroup.ModifyGroup.class;
 
     Class<? extends Payload>[] payload() default {};
 }
