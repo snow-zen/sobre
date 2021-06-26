@@ -9,4 +9,7 @@ public interface ValidGroup {
 
     interface AddGroup extends Default {
     }
+
+    interface ModifyGroup extends Default {
+    }
 }
