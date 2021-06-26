@@ -1,7 +1,10 @@
 package org.snowzen.model.dto;
 
 import lombok.Data;
+import org.snowzen.support.validation.ValidGroup;
+import org.snowzen.support.validation.constraints.ValidId;
 
+import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.util.List;
 
@@ -13,8 +16,10 @@ import java.util.List;
 @Data
 public class CategoryDTO implements Serializable {
 
+    @ValidId(groups = ValidGroup.AddGroup.class)
     private Integer id;
 
+    @NotBlank
     private String name;
 
     private List<TaskDTO> tasks;
