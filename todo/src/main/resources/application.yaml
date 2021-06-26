@@ -22,6 +22,9 @@ spring:
     hibernate:
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+  # jackson配置
+  jackson:
+    default-property-inclusion: non_null
 
 # actuator配置
 management:
