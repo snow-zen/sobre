@@ -2,6 +2,7 @@ package org.snowzen.controller;
 
 import org.snowzen.model.dto.TaskDTO;
 import org.snowzen.service.TaskService;
+import org.snowzen.support.validation.ValidGroup.ModifyGroup;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -53,7 +54,7 @@ public class TaskController {
     }
 
     @PutMapping
-    public void taskModify(@RequestBody @Validated TaskDTO taskDTO) {
+    public void taskModify(@RequestBody @Validated(ModifyGroup.class) TaskDTO taskDTO) {
         taskService.modify(taskDTO);
     }
 

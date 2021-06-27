@@ -2,7 +2,7 @@ package org.snowzen.model.dto;
 
 import lombok.Data;
 import org.snowzen.review.ReviewStrategy;
-import org.snowzen.support.validation.ValidGroup;
+import org.snowzen.support.validation.ValidGroup.ModifyGroup;
 import org.snowzen.support.validation.constraints.ValidId;
 
 import javax.validation.constraints.Future;
@@ -21,7 +21,7 @@ import java.util.List;
 @Data
 public class TaskDTO implements Serializable {
 
-    @ValidId
+    @ValidId(groups = ModifyGroup.class)
     private Integer id;
 
     @NotBlank
@@ -29,19 +29,19 @@ public class TaskDTO implements Serializable {
 
     private String content;
 
-    @Future(groups = ValidGroup.ModifyGroup.class)
+    @Future(groups = ModifyGroup.class)
     private LocalDateTime finishTime;
 
-    @NotNull(groups = ValidGroup.ModifyGroup.class)
+    @NotNull(groups = ModifyGroup.class)
     private Boolean active;
 
     @NotNull
     private ReviewStrategy reviewStrategy;
 
-    @PastOrPresent(groups = ValidGroup.ModifyGroup.class)
+    @PastOrPresent(groups = ModifyGroup.class)
     private LocalDateTime createTime;
 
-    @PastOrPresent(groups = ValidGroup.ModifyGroup.class)
+    @PastOrPresent(groups = ModifyGroup.class)
     private LocalDateTime modifiedTime;
 
     private List<CategoryDTO> categories;
