@@ -1,6 +1,7 @@
 package org.snowzen.controller.advice;
 
 import lombok.extern.slf4j.Slf4j;
+import org.snowzen.constant.ExceptionMessage;
 import org.snowzen.model.ApiResult;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -17,6 +18,13 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 @Slf4j
 @RestControllerAdvice
 public class BaseExceptionHandler {
+
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(INTERNAL_SERVER_ERROR)
+    public ApiResult handlerUnknownException(Exception e) {
+        log.error("未知错误", e);
+        return ApiResult.fail(INTERNAL_SERVER_ERROR.value(), ExceptionMessage.UNKNOWN_ERROR);
+    }
 
     @ExceptionHandler({NullPointerException.class, IllegalArgumentException.class})
     @ResponseStatus(INTERNAL_SERVER_ERROR)
