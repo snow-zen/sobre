@@ -30,7 +30,7 @@ public class BaseApiResultWrapper implements ResponseBodyAdvice<Object> {
 
     @Override
     public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
-        return !ApiResult.class.isAssignableFrom(returnType.getContainingClass()) &&
+        return !ApiResult.class.isAssignableFrom(returnType.getParameterType()) &&
                 (returnType.hasMethodAnnotation(ResponseBody.class) || MergedAnnotations.from(returnType.getContainingClass(), MergedAnnotations.SearchStrategy.INHERITED_ANNOTATIONS).isPresent(ResponseBody.class));
     }
 
