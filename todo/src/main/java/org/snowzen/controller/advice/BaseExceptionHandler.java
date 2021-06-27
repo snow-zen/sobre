@@ -22,7 +22,7 @@ public class BaseExceptionHandler {
     @ResponseStatus(INTERNAL_SERVER_ERROR)
     public ApiResult handlerException(Exception e) {
         log.error("系统错误", e);
-        return ApiResult.fail(INTERNAL_SERVER_ERROR.value(), "系统错误");
+        return ApiResult.fail(INTERNAL_SERVER_ERROR.value(), ExceptionMessage.SYSTEM_ERROR);
     }
 
     @ExceptionHandler(IllegalStateException.class)
