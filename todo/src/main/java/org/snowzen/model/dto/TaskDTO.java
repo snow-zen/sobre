@@ -1,5 +1,6 @@
 package org.snowzen.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.snowzen.review.ReviewStrategy;
 import org.snowzen.support.validation.ValidGroup.ModifyGroup;
@@ -29,6 +30,7 @@ public class TaskDTO implements Serializable {
 
     private String content;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     @Future(groups = ModifyGroup.class)
     private LocalDateTime finishTime;
 
@@ -38,9 +40,11 @@ public class TaskDTO implements Serializable {
     @NotNull
     private ReviewStrategy reviewStrategy;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     @PastOrPresent(groups = ModifyGroup.class)
     private LocalDateTime createTime;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     @PastOrPresent(groups = ModifyGroup.class)
     private LocalDateTime modifiedTime;
 
