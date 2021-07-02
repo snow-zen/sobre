@@ -35,12 +35,10 @@ public class CategoryService {
      * @return 查询结果对应的分类DTO
      */
     public CategoryDTO findCategoryById(int categoryId) {
-        checkArgument(IdUtil.checkId(categoryId), "无效id");
-
         CategoryPO categoryPO = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new NotFoundDataException("分类不存在"));
 
-        return categoryAssembler.PO2DTO(categoryPO);
+        return categoryAssembler.toDTO(categoryPO);
     }
 
     /**
@@ -52,7 +50,7 @@ public class CategoryService {
     public void addCategory(CategoryDTO categoryDTO) {
         checkNotNull(categoryDTO);
 
-        CategoryPO categoryPO = categoryAssembler.DTO2PO(categoryDTO);
+        CategoryPO categoryPO = categoryAssembler.toPO(categoryDTO);
         // 添加前清除id，防止JPA识别为update操作
         categoryPO.setId(null);
         categoryRepository.save(categoryPO);

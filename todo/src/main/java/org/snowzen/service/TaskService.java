@@ -58,7 +58,7 @@ public class TaskService {
         checkNotNull(taskDTO);
 
         taskDTO.setId(null);
-        TaskPO taskPO = taskAssembler.DTO2PO(taskDTO);
+        TaskPO taskPO = taskAssembler.toPO(taskDTO);
         // 任务保存
         taskPO = taskRepository.save(taskPO);
 
@@ -83,12 +83,10 @@ public class TaskService {
      * @return 查询到的任务DTO对象
      */
     public TaskDTO findTask(int taskId) {
-        checkArgument(IdUtil.checkId(taskId));
-
         TaskPO taskPO = taskRepository.findById(taskId)
                 .orElseThrow(() -> new NotFoundDataException("任务不存在"));
 
-        return taskAssembler.PO2DTO(taskPO);
+        return taskAssembler.toDTO(taskPO);
     }
 
     /**
@@ -101,7 +99,7 @@ public class TaskService {
         checkArgument(IdUtil.checkId(categoryId));
 
         return taskRepository.findAllByCategoryId(categoryId).stream()
-                .map(taskAssembler::PO2DTO).collect(Collectors.toList());
+                .map(taskAssembler::toDTO).collect(Collectors.toList());
     }
 
     /**
@@ -111,13 +109,11 @@ public class TaskService {
      * @return 模糊匹配到的任务列表
      */
     public List<TaskDTO> findAllByKey(String key) {
-        checkArgument(key != null);
-
         List<TaskPO> result = !StringUtils.hasText(key) ?
                 taskRepository.findAll() :
                 taskRepository.findAllByTitleContaining(key);
 
-        return result.stream().map(taskAssembler::PO2DTO).collect(Collectors.toList());
+        return result.stream().map(taskAssembler::toDTO).collect(Collectors.toList());
     }
 
     /**
@@ -129,7 +125,7 @@ public class TaskService {
         LocalDateTime now = LocalDateTime.now();
 
         List<TaskPO> taskPOList = taskRepository.findAllByFinishTimeBefore(now);
-        return taskPOList.stream().map(taskAssembler::PO2DTO).collect(Collectors.toList());
+        return taskPOList.stream().map(taskAssembler::toDTO).collect(Collectors.toList());
     }
 
     /**
@@ -169,7 +165,7 @@ public class TaskService {
         checkState(taskRepository.existsById(taskDTO.getId()), "任务不存在");
 
         // 保存任务
-        TaskPO taskPO = taskAssembler.DTO2PO(taskDTO);
+        TaskPO taskPO = taskAssembler.toPO(taskDTO);
         taskRepository.save(taskPO);
 
         Integer taskId = taskDTO.getId();
