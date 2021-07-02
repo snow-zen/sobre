@@ -1,7 +1,9 @@
 package org.snowzen.model.dto;
 
 import lombok.Data;
+import org.snowzen.support.validation.constraints.ValidId;
 
+import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.util.List;
 
@@ -13,8 +15,10 @@ import java.util.List;
 @Data
 public class TagDTO implements Serializable {
 
+    @ValidId(message = "无效标签id")
     private Integer id;
 
+    @NotBlank(message = "无效标签名称")
     private String name;
 
     private List<TaskDTO> tasks;
