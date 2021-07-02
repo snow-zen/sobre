@@ -128,7 +128,7 @@ public class TaskServiceTest {
         when(taskRepository.findById(1)).thenReturn(Optional.of(taskPO));
 
         TaskDTO taskDTO = taskService.findTask(1);
-        assertEquals(taskAssembler.PO2DTO(taskPO), taskDTO);
+        assertEquals(taskAssembler.toDTO(taskPO), taskDTO);
     }
 
     @Test
@@ -155,7 +155,7 @@ public class TaskServiceTest {
 
         assertFalse(CollectionUtils.isEmpty(taskDTOList));
         assertEquals(1, taskDTOList.size());
-        assertEquals(taskAssembler.PO2DTO(taskPO), taskDTOList.get(0));
+        assertEquals(taskAssembler.toDTO(taskPO), taskDTOList.get(0));
     }
 
     @Test
@@ -178,7 +178,7 @@ public class TaskServiceTest {
 
         assertFalse(CollectionUtils.isEmpty(taskDTOList));
         assertEquals(1, taskDTOList.size());
-        assertEquals(taskAssembler.PO2DTO(taskPO1), taskDTOList.get(0));
+        assertEquals(taskAssembler.toDTO(taskPO1), taskDTOList.get(0));
     }
 
     @Test
@@ -201,7 +201,7 @@ public class TaskServiceTest {
 
         assertFalse(CollectionUtils.isEmpty(taskDTOList));
         assertEquals(2, taskDTOList.size());
-        assertEquals(Stream.of(taskPO1, taskPO2).map(taskAssembler::PO2DTO).collect(Collectors.toList()), taskDTOList);
+        assertEquals(Stream.of(taskPO1, taskPO2).map(taskAssembler::toDTO).collect(Collectors.toList()), taskDTOList);
     }
 
     @Test
@@ -218,7 +218,7 @@ public class TaskServiceTest {
 
         assertFalse(CollectionUtils.isEmpty(taskDTOList));
         assertEquals(1, taskDTOList.size());
-        assertEquals(taskAssembler.PO2DTO(taskPO1), taskDTOList.get(0));
+        assertEquals(taskAssembler.toDTO(taskPO1), taskDTOList.get(0));
     }
 
     @Test

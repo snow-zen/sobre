@@ -51,7 +51,7 @@ public class CategoryServiceTest {
         categoryDTO.setId(1);
         categoryDTO.setName("测试分类");
 
-        CategoryPO categoryPO = categoryAssembler.DTO2PO(categoryDTO);
+        CategoryPO categoryPO = categoryAssembler.toPO(categoryDTO);
 
         when(categoryRepository.findById(1))
                 .thenReturn(Optional.of(categoryPO));
