@@ -7,9 +7,8 @@ import org.snowzen.model.dto.CategoryDTO;
 import org.snowzen.model.dto.TaskDTO;
 import org.snowzen.model.po.CategoryPO;
 
-import java.util.Collections;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * @author snow-zen
@@ -35,12 +34,11 @@ public class CategoryAssemblerTest {
         categoryPO.setId(1);
         categoryPO.setName("测试分类");
 
-        CategoryDTO categoryDTO = assembler.PO2DTO(categoryPO);
+        CategoryDTO categoryDTO = assembler.toDTO(categoryPO);
 
         assertNotNull(categoryDTO);
         assertEquals(categoryPO.getId(), categoryDTO.getId());
         assertEquals(categoryPO.getName(), categoryDTO.getName());
-        assertNull(categoryDTO.getTasks());
     }
 
     @Test
@@ -50,9 +48,8 @@ public class CategoryAssemblerTest {
         CategoryDTO categoryDTO = new CategoryDTO();
         categoryDTO.setId(1);
         categoryDTO.setName("测试分类");
-        categoryDTO.setTasks(Collections.singletonList(taskDTO));
 
-        CategoryPO categoryPO = assembler.DTO2PO(categoryDTO);
+        CategoryPO categoryPO = assembler.toPO(categoryDTO);
 
         assertNotNull(categoryPO);
         assertEquals(categoryDTO.getId(), categoryPO.getId());
@@ -65,7 +62,7 @@ public class CategoryAssemblerTest {
         categoryDTO.setId(1);
         categoryDTO.setName("测试分类");
 
-        CategoryPO categoryPO = assembler.DTO2PO(categoryDTO);
+        CategoryPO categoryPO = assembler.toPO(categoryDTO);
 
         assertNotNull(categoryPO);
         assertEquals(categoryDTO.getId(), categoryPO.getId());

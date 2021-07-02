@@ -41,7 +41,7 @@ public class TaskAssemblerTest {
         taskPO.setCreateTime(time);
         taskPO.setModifiedTime(time);
 
-        TaskDTO taskDTO = assembler.PO2DTO(taskPO);
+        TaskDTO taskDTO = assembler.toDTO(taskPO);
 
         assertNotNull(taskDTO);
         assertEquals(taskPO.getId(), taskDTO.getId());
@@ -75,7 +75,7 @@ public class TaskAssemblerTest {
         taskDTO.setCategories(Collections.singletonList(categoryDTO));
         taskDTO.setTags(Collections.singletonList(tagDTO));
 
-        TaskPO taskPO = assembler.DTO2PO(taskDTO);
+        TaskPO taskPO = assembler.toPO(taskDTO);
 
         assertNotNull(taskPO);
         assertEquals(taskPO.getId(), taskDTO.getId());
@@ -102,7 +102,7 @@ public class TaskAssemblerTest {
         taskDTO.setCreateTime(time);
         taskDTO.setModifiedTime(time);
 
-        TaskPO taskPO = assembler.DTO2PO(taskDTO);
+        TaskPO taskPO = assembler.toPO(taskDTO);
 
         assertNotNull(taskPO);
         assertEquals(taskPO.getId(), taskDTO.getId());
