@@ -3,6 +3,7 @@ package org.snowzen.model.assembler;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
+import org.snowzen.model.command.CategoryCreateCommand;
 import org.snowzen.model.dto.CategoryDTO;
 import org.snowzen.model.po.CategoryPO;
 
@@ -22,10 +23,9 @@ public interface CategoryAssembler {
      */
     @Mappings({
             @Mapping(source = "id", target = "id"),
-            @Mapping(source = "name", target = "name"),
-            @Mapping(target = "tasks", ignore = true)
+            @Mapping(source = "name", target = "name")
     })
-    CategoryDTO PO2DTO(CategoryPO categoryPO);
+    CategoryDTO toDTO(CategoryPO categoryPO);
 
     /**
      * {@link CategoryDTO}转为{@link CategoryPO}
@@ -37,5 +37,17 @@ public interface CategoryAssembler {
             @Mapping(source = "id", target = "id"),
             @Mapping(source = "name", target = "name")
     })
-    CategoryPO DTO2PO(CategoryDTO categoryDTO);
+    CategoryPO toPO(CategoryDTO categoryDTO);
+
+    /**
+     * {@link CategoryCreateCommand}转为{@link CategoryDTO}
+     *
+     * @param command 分类创建命令对象
+     * @return 分类DTO
+     */
+    @Mappings({
+            @Mapping(source = "name", target = "name"),
+            @Mapping(target = "id", ignore = true)
+    })
+    CategoryDTO toDTO(CategoryCreateCommand command);
 }
