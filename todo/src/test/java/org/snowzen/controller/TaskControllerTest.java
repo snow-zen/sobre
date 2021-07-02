@@ -1,27 +1,25 @@
 package org.snowzen.controller;
 
 import org.junit.jupiter.api.Test;
-import org.snowzen.model.dto.TaskDTO;
-import org.snowzen.review.ReviewStrategy;
+import org.snowzen.model.assembler.TaskAssembler;
 import org.snowzen.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.ResultMatcher.matchAll;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * @author snow-zen
  */
-@WebMvcTest(TaskController.class)
+@WebMvcTest(
+        value = TaskController.class,
+        includeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = TaskAssembler.class))
 public class TaskControllerTest {
 
     @Autowired
@@ -31,38 +29,207 @@ public class TaskControllerTest {
     private TaskService taskService;
 
     @Test
-    public void testFindTaskById() throws Exception {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime time = LocalDateTime.of(2021, 1, 1, 0, 0, 0);
+    public void testFindTaskUsingInvalidId() throws Exception {
+        int negativeTaskId = -1;
+        long tooLongTaskId = Long.MAX_VALUE;
+        String missTypeTaskId = "4eT9fyd5";
 
-        TaskDTO taskDTO = new TaskDTO();
-        taskDTO.setId(1);
-        taskDTO.setTitle("prepare");
-        taskDTO.setContent("explore");
-        taskDTO.setFinishTime(time);
-        taskDTO.setActive(true);
-        taskDTO.setReviewStrategy(ReviewStrategy.EVERY_DAY);
-        taskDTO.setCreateTime(time);
-        taskDTO.setModifiedTime(time);
+        mvc.perform(get("/task/" + negativeTaskId))
+                .andExpect(status().isBadRequest());
 
-        when(taskService.findTask(1)).thenReturn(taskDTO);
+        mvc.perform(get("/task/" + tooLongTaskId))
+                .andExpect(status().isBadRequest());
 
-        mvc.perform(get("/task/1"))
-                .andExpect(matchAll(
-                        status().isOk(),
-                        jsonPath("$.code").value(200),
-                        jsonPath("$.msg").value("成功"),
-                        jsonPath("$.result.id").value(taskDTO.getId()),
-                        jsonPath("$.result.title").value(taskDTO.getTitle()),
-                        jsonPath("$.result.content").value(taskDTO.getContent()),
-                        jsonPath("$.result.finishTime").value(formatter.format(taskDTO.getFinishTime())),
-                        jsonPath("$.result.active").value(taskDTO.getActive()),
-                        jsonPath("$.result.reviewStrategy").value(taskDTO.getReviewStrategy().name()),
-                        jsonPath("$.result.createTime").value(formatter.format(taskDTO.getCreateTime())),
-                        jsonPath("$.result.modifiedTime").value(formatter.format(taskDTO.getModifiedTime())),
-                        jsonPath("$.result.categories").doesNotExist(),
-                        jsonPath("$.result.tags").doesNotExist()
-                ));
+        mvc.perform(get("/task/" + missTypeTaskId))
+                .andExpect(status().isBadRequest());
     }
 
+    @Test
+    public void testAddTaskUsingInvalidArgument() throws Exception {
+        // 测试缺失title
+        //language=JSON
+        String withoutTitle = "{\n" +
+                "  \"content\": \"post\",\n" +
+                "  \"active\": true,\n" +
+                "  \"reviewStrategy\": \"EVERY_DAY\",\n" +
+                "  \"categories\": [\n" +
+                "    {\n" +
+                "      \"id\": 1,\n" +
+                "      \"name\": \"rather\"\n" +
+                "    }\n" +
+                "  ],\n" +
+                "  \"tags\": [\n" +
+                "    {\n" +
+                "      \"id\": 1,\n" +
+                "      \"name\": \"wage\"\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
+
+        mvc.perform(
+                post("/task")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(withoutTitle)
+        ).andExpect(status().isBadRequest());
+
+        // 测试无效reviewStrategy
+        //language=JSON
+        String illegalReviewStrategy = "{\n" +
+                "  \"title\": \"multiply\",\n" +
+                "  \"content\": \"hide\",\n" +
+                "  \"active\": true,\n" +
+                "  \"reviewStrategy\": \"strike\",\n" +
+                "  \"categories\": [\n" +
+                "    {\n" +
+                "      \"id\": 1,\n" +
+                "      \"name\": \"wreck\"\n" +
+                "    }\n" +
+                "  ],\n" +
+                "  \"tags\": [\n" +
+                "    {\n" +
+                "      \"id\": 1,\n" +
+                "      \"name\": \"log\"\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
+
+        mvc.perform(
+                post("/task")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(illegalReviewStrategy)
+        ).andExpect(status().isBadRequest());
+
+        // 测试残缺的分类信息
+        //language=JSON
+        String withIncompleteCategories = "{\n" +
+                "  \"title\": \"she\",\n" +
+                "  \"content\": \"mile\",\n" +
+                "  \"active\": true,\n" +
+                "  \"reviewStrategy\": \"EVERY_DAY\",\n" +
+                "  \"categories\": [\n" +
+                "    {\n" +
+                "      \"name\": \"breath\"\n" +
+                "    }\n" +
+                "  ],\n" +
+                "  \"tags\": [\n" +
+                "    {\n" +
+                "      \"id\": 1,\n" +
+                "      \"name\": \"beneath\"\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
+
+        mvc.perform(
+                post("/task")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(withIncompleteCategories)
+        ).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void testUpdateTaskUsingInvalidArgument() throws Exception {
+        // 测试缺失id
+
+        //language=JSON
+        String withoutId = "{\n" +
+                "  \"title\": \"south\",\n" +
+                "  \"active\": true,\n" +
+                "  \"reviewStrategy\": \"EVERY_DAY\",\n" +
+                "  \"categories\": [\n" +
+                "    {\n" +
+                "      \"id\": 1,\n" +
+                "      \"name\": \"wheel\"\n" +
+                "    }\n" +
+                "  ],\n" +
+                "  \"tags\": [\n" +
+                "    {\n" +
+                "      \"id\": 1,\n" +
+                "      \"name\": \"bar\"\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
+
+        mvc.perform(
+                put("/task")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(withoutId)
+        ).andExpect(status().isBadRequest());
+
+        // 测试缺失title
+
+        //language=JSON
+        String withoutTitle = "{\n" +
+                "  \"id\": 1,\n" +
+                "  \"active\": true,\n" +
+                "  \"reviewStrategy\": \"EVERY_DAY\",\n" +
+                "  \"categories\": [\n" +
+                "    {\n" +
+                "      \"id\": 1,\n" +
+                "      \"name\": \"describe\"\n" +
+                "    }\n" +
+                "  ],\n" +
+                "  \"tags\": [\n" +
+                "    {\n" +
+                "      \"id\": 1,\n" +
+                "      \"name\": \"scorn\"\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
+
+        mvc.perform(
+                put("/task")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(withoutTitle)
+        ).andExpect(status().isBadRequest());
+
+        // 测试缺失活跃状态
+
+        //language=JSON
+        String withoutActive = "{\n" +
+                "  \"id\": 1,\n" +
+                "  \"title\": \"fame\",\n" +
+                "  \"reviewStrategy\": \"EVERY_DAY\",\n" +
+                "  \"categories\": [\n" +
+                "    {\n" +
+                "      \"id\": 1,\n" +
+                "      \"name\": \"offense\"\n" +
+                "    }\n" +
+                "  ],\n" +
+                "  \"tags\": [\n" +
+                "    {\n" +
+                "      \"id\": 1,\n" +
+                "      \"name\": \"soon\"\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
+
+        mvc.perform(
+                put("/task")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(withoutActive)
+        ).andExpect(status().isBadRequest());
+
+        // 测试缺失关联分类信息
+
+        //language=JSON
+        String withoutCategories = "{\n" +
+                "  \"id\": 1,\n" +
+                "  \"title\": \"what\",\n" +
+                "  \"active\": true,\n" +
+                "  \"reviewStrategy\": \"EVERY_DAY\",\n" +
+                "  \"tags\": [\n" +
+                "    {\n" +
+                "      \"id\": 1,\n" +
+                "      \"name\": \"rest\"\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
+
+        mvc.perform(
+                put("/task")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(withoutCategories)
+        ).andExpect(status().isBadRequest());
+
+    }
 }
