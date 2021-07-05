@@ -21,7 +21,6 @@ public interface TagAssembler {
     @Mappings({
             @Mapping(source = "id", target = "id"),
             @Mapping(source = "name", target = "name"),
-            @Mapping(target = "tasks", ignore = true)
     })
     TagDTO toDTO(TagPO tagPO);
 
