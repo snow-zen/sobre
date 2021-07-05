@@ -9,6 +9,11 @@ import org.snowzen.repository.dao.CategoryRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -80,5 +85,17 @@ public class CategoryService {
         if (!hasCategory(categoryId)) {
             throw new NotFoundDataException("分类不存在");
         }
+    }
+
+    /**
+     * 通过分类id列表查询所有匹配分类
+     *
+     * @param categoryIdList 分类id列表
+     * @return 分类DTO列表
+     */
+    public List<CategoryDTO> findAllCategoryById(Collection<Integer> categoryIdList) {
+        return StreamSupport.stream(categoryRepository.findAllById(categoryIdList).spliterator(), false)
+                .map(categoryAssembler::toDTO)
+                .collect(Collectors.toList());
     }
 }
