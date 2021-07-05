@@ -3,6 +3,8 @@ package org.snowzen.service;
 import org.snowzen.base.IdUtil;
 import org.snowzen.exception.NotFoundDataException;
 import org.snowzen.model.assembler.TaskAssembler;
+import org.snowzen.model.dto.CategoryDTO;
+import org.snowzen.model.dto.TagDTO;
 import org.snowzen.model.dto.TaskDTO;
 import org.snowzen.model.po.TaskPO;
 import org.snowzen.model.po.relation.CategoryTaskRelationPO;
@@ -11,16 +13,15 @@ import org.snowzen.repository.dao.TaskRepository;
 import org.snowzen.repository.dao.relation.CategoryTaskRelationRepository;
 import org.snowzen.repository.dao.relation.TagTaskRelationRepository;
 import org.snowzen.review.ReviewTimeUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.*;
@@ -41,12 +42,22 @@ public class TaskService {
 
     private final TaskAssembler taskAssembler;
 
-    public TaskService(TaskRepository taskRepository, TagTaskRelationRepository tagTaskRelationRepository, CategoryTaskRelationRepository categoryTaskRelationRepository, TaskAssembler taskAssembler) {
+    @Autowired
+    private AssociatedTagLoader tagLoader;
+
+    @Autowired
+    private AssociatedCategoryLoader categoryLoader;
+
+    public TaskService(TaskRepository taskRepository,
+                       TagTaskRelationRepository tagTaskRelationRepository,
+                       CategoryTaskRelationRepository categoryTaskRelationRepository,
+                       TaskAssembler taskAssembler) {
         this.taskRepository = taskRepository;
         this.tagTaskRelationRepository = tagTaskRelationRepository;
         this.categoryTaskRelationRepository = categoryTaskRelationRepository;
         this.taskAssembler = taskAssembler;
     }
+
 
     /**
      * 添加任务
@@ -86,7 +97,10 @@ public class TaskService {
         TaskPO taskPO = taskRepository.findById(taskId)
                 .orElseThrow(() -> new NotFoundDataException("任务不存在"));
 
-        return taskAssembler.toDTO(taskPO);
+        TaskDTO taskDTO = taskAssembler.toDTO(taskPO);
+        tagLoader.injectTag(taskDTO);
+        categoryLoader.injectCategory(taskDTO);
+        return taskDTO;
     }
 
     /**
@@ -260,5 +274,91 @@ public class TaskService {
                     categoryTaskRelationPO.setCategoryId(categoryDTO.getId());
                     return categoryTaskRelationPO;
                 }).collect(Collectors.toList());
+    }
+
+    /**
+     * 关联分类装载器
+     */
+    @Component
+    static class AssociatedCategoryLoader {
+
+        private final CategoryService categoryService;
+
+        private final CategoryTaskRelationRepository categoryTaskRelationRepository;
+
+        public AssociatedCategoryLoader(CategoryService categoryService, CategoryTaskRelationRepository categoryTaskRelationRepository) {
+            this.categoryService = categoryService;
+            this.categoryTaskRelationRepository = categoryTaskRelationRepository;
+        }
+
+        public void injectCategory(TaskDTO taskDTO) {
+            injectCategory(Collections.singletonList(taskDTO));
+        }
+
+        public void injectCategory(Collection<TaskDTO> taskDTOS) {
+            List<CategoryTaskRelationPO> categoryTaskRelationPOList = categoryTaskRelationRepository.findAllByTaskIdIn(
+                    taskDTOS.stream().map(TaskDTO::getId).collect(Collectors.toList()));
+
+            Map<Integer, List<CategoryTaskRelationPO>> taskRelational = categoryTaskRelationPOList.stream()
+                    .collect(Collectors.groupingBy(CategoryTaskRelationPO::getTaskId));
+
+            Map<Integer, CategoryDTO> categoryMap = categoryService.findAllCategoryById(
+                    categoryTaskRelationPOList.stream()
+                            .map(CategoryTaskRelationPO::getCategoryId)
+                            .collect(Collectors.toList())
+            ).stream().collect(Collectors.toMap(CategoryDTO::getId, categoryDTO -> categoryDTO));
+
+            taskDTOS.forEach(dto -> {
+                List<CategoryDTO> relationCategory = Optional.ofNullable(taskRelational.get(dto.getId()))
+                        .orElse(Collections.emptyList())
+                        .stream()
+                        .map(po -> categoryMap.get(po.getCategoryId()))
+                        .collect(Collectors.toList());
+                dto.setCategories(relationCategory);
+            });
+        }
+    }
+
+    /**
+     * 关联标签装载器
+     */
+    @Component
+    static class AssociatedTagLoader {
+
+        private final TagService tagService;
+
+        private final TagTaskRelationRepository tagTaskRelationRepository;
+
+        public AssociatedTagLoader(TagService tagService, TagTaskRelationRepository tagTaskRelationRepository) {
+            this.tagService = tagService;
+            this.tagTaskRelationRepository = tagTaskRelationRepository;
+        }
+
+        public void injectTag(TaskDTO taskDTO) {
+            injectTag(Collections.singletonList(taskDTO));
+        }
+
+        public void injectTag(Collection<TaskDTO> taskDTOS) {
+            List<TagTaskRelationPO> tagTaskRelationPOList = tagTaskRelationRepository.findAllByTaskIdIn(
+                    taskDTOS.stream().map(TaskDTO::getId).collect(Collectors.toList()));
+
+            Map<Integer, List<TagTaskRelationPO>> tagRelational = tagTaskRelationPOList.stream()
+                    .collect(Collectors.groupingBy(TagTaskRelationPO::getTaskId));
+
+            Map<Integer, TagDTO> tagMap = tagService.findAllTagById(
+                    tagTaskRelationPOList.stream()
+                            .map(TagTaskRelationPO::getTagId)
+                            .collect(Collectors.toList())
+            ).stream().collect(Collectors.toMap(TagDTO::getId, tagDTO -> tagDTO));
+
+            taskDTOS.forEach(dto -> {
+                List<TagDTO> relationTag = Optional.ofNullable(tagRelational.get(dto.getId()))
+                        .orElse(Collections.emptyList())
+                        .stream()
+                        .map(po -> tagMap.get(po.getTagId()))
+                        .collect(Collectors.toList());
+                dto.setTags(relationTag);
+            });
+        }
     }
 }
