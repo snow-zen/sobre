@@ -5,7 +5,6 @@ import org.snowzen.support.validation.constraints.ValidId;
 
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
-import java.util.List;
 
 /**
  * 标签DTO
@@ -20,6 +19,4 @@ public class TagDTO implements Serializable {
 
     @NotBlank(message = "无效标签名称")
     private String name;
-
-    private List<TaskDTO> tasks;
 }
