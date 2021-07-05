@@ -22,6 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
@@ -34,8 +35,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author snow-zen
@@ -60,10 +60,18 @@ public class TaskServiceTest {
     @Mock
     private CategoryTaskRelationRepository categoryTaskRelationRepository;
 
+    @Mock
+    private TaskService.AssociatedTagLoader tagLoader;
+
+    @Mock
+    private TaskService.AssociatedCategoryLoader categoryLoader;
+
     @BeforeEach
     public void createService() {
         taskAssembler = Mappers.getMapper(TaskAssembler.class);
         taskService = new TaskService(taskRepository, tagTaskRelationRepository, categoryTaskRelationRepository, taskAssembler);
+        ReflectionTestUtils.setField(taskService, "tagLoader", tagLoader);
+        ReflectionTestUtils.setField(taskService, "categoryLoader", categoryLoader);
     }
 
     @Test
@@ -125,10 +133,35 @@ public class TaskServiceTest {
         taskPO.setCreateTime(LocalDateTime.now());
         taskPO.setModifiedTime(LocalDateTime.now());
 
+        CategoryDTO categoryDTO = new CategoryDTO();
+        categoryDTO.setId(1);
+        categoryDTO.setName("fresh");
+
+        TagDTO tagDTO = new TagDTO();
+        tagDTO.setId(1);
+        tagDTO.setName("duck");
+
         when(taskRepository.findById(1)).thenReturn(Optional.of(taskPO));
+        doAnswer(invocation -> {
+            TaskDTO taskDTO = invocation.getArgument(0, TaskDTO.class);
+            taskDTO.setCategories(Collections.singletonList(categoryDTO));
+            return null;
+        }).when(categoryLoader).injectCategory(any(TaskDTO.class));
+        doAnswer(invocation -> {
+            TaskDTO taskDTO = invocation.getArgument(0, TaskDTO.class);
+            taskDTO.setTags(Collections.singletonList(tagDTO));
+            return null;
+        }).when(tagLoader).injectTag(any(TaskDTO.class));
 
         TaskDTO taskDTO = taskService.findTask(1);
-        assertEquals(taskAssembler.toDTO(taskPO), taskDTO);
+        assertEquals(taskPO.getId(), taskDTO.getId());
+        assertEquals(taskPO.getTitle(), taskDTO.getTitle());
+        assertEquals(taskPO.getContent(), taskDTO.getContent());
+        assertEquals(taskPO.getFinishTime(), taskDTO.getFinishTime());
+        assertEquals(taskPO.getActive(), taskDTO.getActive());
+        assertEquals(taskPO.getReviewStrategy(), taskDTO.getReviewStrategy());
+        assertEquals(taskPO.getCreateTime(), taskDTO.getCreateTime());
+        assertEquals(taskPO.getModifiedTime(), taskDTO.getModifiedTime());
     }
 
     @Test
