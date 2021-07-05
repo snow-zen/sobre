@@ -23,7 +23,7 @@ public interface TagAssembler {
             @Mapping(source = "name", target = "name"),
             @Mapping(target = "tasks", ignore = true)
     })
-    TagDTO PO2DTO(TagPO tagPO);
+    TagDTO toDTO(TagPO tagPO);
 
     /**
      * {@link TagDTO}转为{@link TagPO}
@@ -35,5 +35,5 @@ public interface TagAssembler {
             @Mapping(source = "id", target = "id"),
             @Mapping(source = "name", target = "name")
     })
-    TagPO DTO2PO(TagDTO tagDTO);
+    TagPO toPO(TagDTO tagDTO);
 }
