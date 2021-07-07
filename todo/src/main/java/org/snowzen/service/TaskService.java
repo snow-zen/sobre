@@ -112,8 +112,13 @@ public class TaskService {
     public List<TaskDTO> findAllByCategoryId(int categoryId) {
         checkArgument(IdUtil.checkId(categoryId));
 
-        return taskRepository.findAllByCategoryId(categoryId).stream()
+        List<TaskDTO> taskDTOList = taskRepository.findAllByCategoryId(categoryId).stream()
                 .map(taskAssembler::toDTO).collect(Collectors.toList());
+
+        tagLoader.injectTag(taskDTOList);
+        categoryLoader.injectCategory(taskDTOList);
+
+        return taskDTOList;
     }
 
     /**
@@ -127,7 +132,10 @@ public class TaskService {
                 taskRepository.findAll() :
                 taskRepository.findAllByTitleContaining(key);
 
-        return result.stream().map(taskAssembler::toDTO).collect(Collectors.toList());
+        List<TaskDTO> taskDTOList = result.stream().map(taskAssembler::toDTO).collect(Collectors.toList());
+        tagLoader.injectTag(taskDTOList);
+        categoryLoader.injectCategory(taskDTOList);
+        return taskDTOList;
     }
 
     /**
@@ -138,8 +146,12 @@ public class TaskService {
     public List<TaskDTO> findAllNeedReview() {
         LocalDateTime now = LocalDateTime.now();
 
-        List<TaskPO> taskPOList = taskRepository.findAllByFinishTimeBefore(now);
-        return taskPOList.stream().map(taskAssembler::toDTO).collect(Collectors.toList());
+        List<TaskDTO> taskDTOList = taskRepository.findAllByFinishTimeBefore(now).stream()
+                .map(taskAssembler::toDTO)
+                .collect(Collectors.toList());
+        tagLoader.injectTag(taskDTOList);
+        categoryLoader.injectCategory(taskDTOList);
+        return taskDTOList;
     }
 
     /**
@@ -295,26 +307,28 @@ public class TaskService {
             injectCategory(Collections.singletonList(taskDTO));
         }
 
-        public void injectCategory(Collection<TaskDTO> taskDTOS) {
+        public void injectCategory(List<TaskDTO> taskDTOList) {
+            // 查询关联关系
             List<CategoryTaskRelationPO> categoryTaskRelationPOList = categoryTaskRelationRepository.findAllByTaskIdIn(
-                    taskDTOS.stream().map(TaskDTO::getId).collect(Collectors.toList()));
+                    taskDTOList.stream().map(TaskDTO::getId).collect(Collectors.toList()));
 
-            Map<Integer, List<CategoryTaskRelationPO>> taskRelational = categoryTaskRelationPOList.stream()
-                    .collect(Collectors.groupingBy(CategoryTaskRelationPO::getTaskId));
+            // 聚合categoryId查询category
+            List<CategoryDTO> categoryDTOList = categoryService.findAllCategoryById(
+                    categoryTaskRelationPOList.stream().map(CategoryTaskRelationPO::getCategoryId).collect(Collectors.toList()));
 
-            Map<Integer, CategoryDTO> categoryMap = categoryService.findAllCategoryById(
-                    categoryTaskRelationPOList.stream()
-                            .map(CategoryTaskRelationPO::getCategoryId)
-                            .collect(Collectors.toList())
-            ).stream().collect(Collectors.toMap(CategoryDTO::getId, categoryDTO -> categoryDTO));
+            // 建立map
+            Map<Integer, TaskDTO> taskDTOMap = taskDTOList.stream().collect(Collectors.toMap(TaskDTO::getId, taskDTO -> taskDTO));
+            Map<Integer, CategoryDTO> categoryDTOMap = categoryDTOList.stream().collect(Collectors.toMap(CategoryDTO::getId, categoryDTO -> categoryDTO));
 
-            taskDTOS.forEach(dto -> {
-                List<CategoryDTO> relationCategory = Optional.ofNullable(taskRelational.get(dto.getId()))
-                        .orElse(Collections.emptyList())
-                        .stream()
-                        .map(po -> categoryMap.get(po.getCategoryId()))
-                        .collect(Collectors.toList());
-                dto.setCategories(relationCategory);
+            // 遍历关联关系，注入
+            categoryTaskRelationPOList.forEach(relation -> {
+                TaskDTO taskDTO = taskDTOMap.get(relation.getTaskId());
+                CategoryDTO categoryDTO = categoryDTOMap.get(relation.getCategoryId());
+                if (taskDTO.getCategories() == null) {
+                    taskDTO.setCategories(Collections.singletonList(categoryDTO));
+                } else {
+                    taskDTO.getCategories().add(categoryDTO);
+                }
             });
         }
     }
@@ -338,26 +352,28 @@ public class TaskService {
             injectTag(Collections.singletonList(taskDTO));
         }
 
-        public void injectTag(Collection<TaskDTO> taskDTOS) {
+        public void injectTag(List<TaskDTO> taskDTOList) {
+            // 查找关联关系
             List<TagTaskRelationPO> tagTaskRelationPOList = tagTaskRelationRepository.findAllByTaskIdIn(
-                    taskDTOS.stream().map(TaskDTO::getId).collect(Collectors.toList()));
+                    taskDTOList.stream().map(TaskDTO::getId).collect(Collectors.toList()));
 
-            Map<Integer, List<TagTaskRelationPO>> tagRelational = tagTaskRelationPOList.stream()
-                    .collect(Collectors.groupingBy(TagTaskRelationPO::getTaskId));
+            // 聚合tagId查询待处理tag
+            List<TagDTO> tagDTOList = tagService.findAllTagById(
+                    tagTaskRelationPOList.stream().map(TagTaskRelationPO::getTagId).collect(Collectors.toList()));
 
-            Map<Integer, TagDTO> tagMap = tagService.findAllTagById(
-                    tagTaskRelationPOList.stream()
-                            .map(TagTaskRelationPO::getTagId)
-                            .collect(Collectors.toList())
-            ).stream().collect(Collectors.toMap(TagDTO::getId, tagDTO -> tagDTO));
+            // 建立map
+            Map<Integer, TaskDTO> taskDTOMap = taskDTOList.stream().collect(Collectors.toMap(TaskDTO::getId, taskDTO -> taskDTO));
+            Map<Integer, TagDTO> tagDTOMap = tagDTOList.stream().collect(Collectors.toMap(TagDTO::getId, tagDTO -> tagDTO));
 
-            taskDTOS.forEach(dto -> {
-                List<TagDTO> relationTag = Optional.ofNullable(tagRelational.get(dto.getId()))
-                        .orElse(Collections.emptyList())
-                        .stream()
-                        .map(po -> tagMap.get(po.getTagId()))
-                        .collect(Collectors.toList());
-                dto.setTags(relationTag);
+            // 遍历关联关系，进行注入
+            tagTaskRelationPOList.forEach(relation -> {
+                TaskDTO taskDTO = taskDTOMap.get(relation.getTaskId());
+                TagDTO tagDTO = tagDTOMap.get(relation.getTagId());
+                if (taskDTO.getTags() == null) {
+                    taskDTO.setTags(Collections.singletonList(tagDTO));
+                } else {
+                    taskDTO.getTags().add(tagDTO);
+                }
             });
         }
     }
