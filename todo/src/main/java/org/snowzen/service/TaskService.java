@@ -13,7 +13,6 @@ import org.snowzen.repository.dao.TaskRepository;
 import org.snowzen.repository.dao.relation.CategoryTaskRelationRepository;
 import org.snowzen.repository.dao.relation.TagTaskRelationRepository;
 import org.snowzen.review.ReviewTimeUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,20 +41,20 @@ public class TaskService {
 
     private final TaskAssembler taskAssembler;
 
-    @Autowired
-    private AssociatedTagLoader tagLoader;
+    private final AssociatedTagLoader tagLoader;
 
-    @Autowired
-    private AssociatedCategoryLoader categoryLoader;
+    private final AssociatedCategoryLoader categoryLoader;
 
     public TaskService(TaskRepository taskRepository,
                        TagTaskRelationRepository tagTaskRelationRepository,
                        CategoryTaskRelationRepository categoryTaskRelationRepository,
-                       TaskAssembler taskAssembler) {
+                       TaskAssembler taskAssembler, AssociatedTagLoader tagLoader, AssociatedCategoryLoader categoryLoader) {
         this.taskRepository = taskRepository;
         this.tagTaskRelationRepository = tagTaskRelationRepository;
         this.categoryTaskRelationRepository = categoryTaskRelationRepository;
         this.taskAssembler = taskAssembler;
+        this.tagLoader = tagLoader;
+        this.categoryLoader = categoryLoader;
     }
 
 

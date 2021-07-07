@@ -22,7 +22,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
@@ -69,9 +68,13 @@ public class TaskServiceTest {
     @BeforeEach
     public void createService() {
         taskAssembler = Mappers.getMapper(TaskAssembler.class);
-        taskService = new TaskService(taskRepository, tagTaskRelationRepository, categoryTaskRelationRepository, taskAssembler);
-        ReflectionTestUtils.setField(taskService, "tagLoader", tagLoader);
-        ReflectionTestUtils.setField(taskService, "categoryLoader", categoryLoader);
+        taskService = new TaskService(
+                taskRepository,
+                tagTaskRelationRepository,
+                categoryTaskRelationRepository,
+                taskAssembler,
+                tagLoader,
+                categoryLoader);
     }
 
     @Test
