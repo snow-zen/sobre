@@ -5,7 +5,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import static org.snowzen.controller.advice.BusinessExceptionHandlerTest.NOT_FOUND_DATA_MESSAGE;
+import static org.snowzen.controller.advice.BusinessExceptionHandler.NOT_FOUND_DATA;
+
 
 /**
  * @author snow-zen
@@ -26,7 +27,7 @@ public class ExceptionTestController {
 
     @GetMapping("/NotFoundDataException")
     public void notFoundDataException() {
-        throw new NotFoundDataException(NOT_FOUND_DATA_MESSAGE);
+        throw new NotFoundDataException(NOT_FOUND_DATA);
     }
 
 }
