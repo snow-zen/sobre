@@ -26,7 +26,7 @@ public class TaskCreateCommand implements Serializable {
     private ReviewStrategy reviewStrategy;
 
     @Valid
-    private List<CategoryDTO> categories;
+    private CategoryDTO category;
 
     @Valid
     private List<TagDTO> tags;

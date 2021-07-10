@@ -33,8 +33,7 @@ public class TaskUpdateCommand implements Serializable {
     private ReviewStrategy reviewStrategy;
 
     @Valid
-    @NotNull(message = "任务关联分类不能为null")
-    private List<CategoryDTO> categories;
+    private CategoryDTO category;
 
     @Valid
     @NotNull(message = "任务关联标签不能为null")

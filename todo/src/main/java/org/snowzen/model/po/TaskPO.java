@@ -50,6 +50,12 @@ public class TaskPO extends BaseWithTimePO {
     @Column(name = "review_strategy")
     private ReviewStrategy reviewStrategy;
 
+    /**
+     * 关联分类id
+     */
+    @Column(name = "category_id")
+    private Integer categoryId;
+
     @Override
     public void prePersistCallback() {
         super.prePersistCallback();

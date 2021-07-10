@@ -23,6 +23,7 @@ CREATE TABLE TODO_TASK
     finish_time     DATETIME COMMENT '任务预计完成时间',
     is_active       TINYINT UNSIGNED COMMENT '任务是否启动',
     review_strategy VARCHAR(100) COMMENT '复习策略',
+    category_id     INT UNSIGNED COMMENT '关联分类id',
     gmt_create      DATETIME     NOT NULL DEFAULT NOW() COMMENT '任务创建时间',
     gmt_modified    DATETIME     NOT NULL DEFAULT NOW() COMMENT '任务更新时间',
     CONSTRAINT uk_title UNIQUE (title)
@@ -36,12 +37,3 @@ CREATE TABLE TODO_TASK_TAG
     tag_id  INT UNSIGNED,
     CONSTRAINT uk_task_tag_id UNIQUE (task_id, tag_id)
 ) COMMENT '任务-标签中间表';
-
-# 任务-类型中间表
-CREATE TABLE TODO_TASK_CATEGORY
-(
-    id          INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-    task_id     INT UNSIGNED,
-    category_id INT UNSIGNED,
-    CONSTRAINT uk_task_category_id UNIQUE (task_id, category_id)
-) COMMENT '任务-类型中间表';
