@@ -8,8 +8,10 @@ import org.snowzen.model.po.CategoryPO;
 import org.snowzen.repository.dao.CategoryRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -70,7 +72,18 @@ public class CategoryService {
     public boolean hasCategory(int categoryId) {
         checkArgument(IdUtil.checkId(categoryId), "无效id");
 
-        return categoryRepository.existsById(categoryId);
+        return hasCategories(Collections.singletonList(categoryId));
+    }
+
+    /**
+     * 通过给定分类id列表判断是否都存在对应的分类对象
+     *
+     * @param categoryIdList 分类id列表
+     * @return 任意一个分类id不存在对应分类对象时返回true，否则返回false
+     */
+    public boolean hasCategories(List<Integer> categoryIdList) {
+        return !CollectionUtils.isEmpty(categoryIdList) &&
+                categoryRepository.countAllByIdIn(categoryIdList) == categoryIdList.size();
     }
 
     /**

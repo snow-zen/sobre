@@ -80,21 +80,21 @@ public class CategoryServiceTest {
 
     @Test
     public void testHasCategory() {
-        when(categoryRepository.existsById(1)).thenReturn(Boolean.TRUE);
+        when(categoryRepository.countAllByIdIn(any())).thenReturn(1);
 
         assertDoesNotThrow(() -> assertTrue(categoryService.hasCategory(1)));
     }
 
     @Test
     public void testEnsureCategory() {
-        when(categoryRepository.existsById(1)).thenReturn(Boolean.TRUE);
+        when(categoryRepository.countAllByIdIn(any())).thenReturn(1);
 
         assertDoesNotThrow(() -> categoryService.ensureCategory(1));
     }
 
     @Test
     public void testEnsureCategoryThrowException() {
-        when(categoryRepository.existsById(1)).thenReturn(Boolean.FALSE);
+        when(categoryRepository.countAllByIdIn(any())).thenReturn(0);
 
         assertThrows(NotFoundDataException.class, () -> categoryService.ensureCategory(1));
     }
