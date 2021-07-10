@@ -2,8 +2,6 @@ package org.snowzen.repository.dao;
 
 import org.snowzen.model.po.TaskPO;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -23,9 +21,7 @@ public interface TaskRepository extends JpaRepository<TaskPO, Integer> {
      * @param categoryId 分类id
      * @return 查询到的关联任务列表
      */
-    @Query(value = "SELECT TT.id AS id, title, content, finish_time, is_active, review_strategy, gmt_create, gmt_modified, TTC.id, task_id, category_id FROM TODO_TASK TT LEFT JOIN TODO_TASK_CATEGORY TTC on TT.id = TTC.task_id WHERE TTC.category_id = :categoryId",
-            nativeQuery = true)
-    List<TaskPO> findAllByCategoryId(@Param("categoryId") int categoryId);
+    List<TaskPO> findAllByCategoryId(int categoryId);
 
     /**
      * 通过关键字匹配对应任务
