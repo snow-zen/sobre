@@ -2,33 +2,49 @@ package org.snowzen.model.assembler;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mapstruct.factory.Mappers;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.snowzen.model.dto.CategoryDTO;
 import org.snowzen.model.dto.TagDTO;
 import org.snowzen.model.dto.TaskDTO;
 import org.snowzen.model.po.TaskPO;
 import org.snowzen.review.ReviewStrategy;
+import org.snowzen.service.CategoryService;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockServletContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 /**
  * @author snow-zen
  */
-@SuppressWarnings("WrongUsageOfMappersFactory")
+@ExtendWith(MockitoExtension.class)
+@WebAppConfiguration
+@ContextConfiguration(classes = MockServletContext.class)
+@SpringBootTest
 public class TaskAssemblerTest {
+
+    @Mock
+    private CategoryService categoryService;
 
     private TaskAssembler assembler;
 
     @BeforeEach
     public void createAssembler() {
-        assembler = Mappers.getMapper(TaskAssembler.class);
+        assembler = new TaskAssembler();
+        ReflectionTestUtils.setField(assembler, "categoryService", categoryService);
     }
 
     @Test
-    public void testPO2DTO() {
+    public void testToDTO() {
         LocalDateTime time = LocalDateTime.of(2021, 1, 1, 0, 0);
 
         TaskPO taskPO = new TaskPO();
@@ -40,6 +56,13 @@ public class TaskAssemblerTest {
         taskPO.setReviewStrategy(ReviewStrategy.EVERY_DAY);
         taskPO.setCreateTime(time);
         taskPO.setModifiedTime(time);
+        taskPO.setCategoryId(1);
+
+        CategoryDTO categoryDTO = new CategoryDTO();
+        categoryDTO.setId(1);
+        categoryDTO.setName("electric");
+
+        when(categoryService.findCategoryById(1)).thenReturn(categoryDTO);
 
         TaskDTO taskDTO = assembler.toDTO(taskPO);
 
@@ -52,15 +75,18 @@ public class TaskAssemblerTest {
         assertEquals(taskPO.getReviewStrategy(), taskDTO.getReviewStrategy());
         assertEquals(taskPO.getCreateTime(), taskDTO.getCreateTime());
         assertEquals(taskPO.getModifiedTime(), taskDTO.getModifiedTime());
-        assertNull(taskDTO.getCategories());
+        assertEquals(taskPO.getCategoryId(), taskDTO.getCategory().getId());
         assertNull(taskDTO.getTags());
     }
 
     @Test
-    public void testDTO2PO() {
+    public void testToPO() {
         LocalDateTime time = LocalDateTime.of(2021, 1, 1, 0, 0);
 
         CategoryDTO categoryDTO = new CategoryDTO();
+        categoryDTO.setId(1);
+        categoryDTO.setName("steer");
+
         TagDTO tagDTO = new TagDTO();
 
         TaskDTO taskDTO = new TaskDTO();
@@ -72,7 +98,7 @@ public class TaskAssemblerTest {
         taskDTO.setReviewStrategy(ReviewStrategy.EVERY_DAY);
         taskDTO.setCreateTime(time);
         taskDTO.setModifiedTime(time);
-        taskDTO.setCategories(Collections.singletonList(categoryDTO));
+        taskDTO.setCategory(categoryDTO);
         taskDTO.setTags(Collections.singletonList(tagDTO));
 
         TaskPO taskPO = assembler.toPO(taskDTO);
@@ -86,10 +112,11 @@ public class TaskAssemblerTest {
         assertEquals(taskPO.getReviewStrategy(), taskDTO.getReviewStrategy());
         assertEquals(taskPO.getCreateTime(), taskDTO.getCreateTime());
         assertEquals(taskPO.getModifiedTime(), taskDTO.getModifiedTime());
+        assertEquals(taskPO.getCategoryId(), taskDTO.getCategory().getId());
     }
 
     @Test
-    public void testDTO2POWithoutCategoriesAndTag() {
+    public void testToPOWithoutCategoriesAndTag() {
         LocalDateTime time = LocalDateTime.of(2021, 1, 1, 0, 0);
 
         TaskDTO taskDTO = new TaskDTO();
@@ -113,5 +140,6 @@ public class TaskAssemblerTest {
         assertEquals(taskPO.getReviewStrategy(), taskDTO.getReviewStrategy());
         assertEquals(taskPO.getCreateTime(), taskDTO.getCreateTime());
         assertEquals(taskPO.getModifiedTime(), taskDTO.getModifiedTime());
+        assertNull(taskPO.getCategoryId());
     }
 }

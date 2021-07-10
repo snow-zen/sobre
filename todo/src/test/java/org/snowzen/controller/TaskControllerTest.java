@@ -2,6 +2,7 @@ package org.snowzen.controller;
 
 import org.junit.jupiter.api.Test;
 import org.snowzen.model.assembler.TaskAssembler;
+import org.snowzen.service.CategoryService;
 import org.snowzen.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -24,6 +25,9 @@ public class TaskControllerTest {
 
     @Autowired
     private MockMvc mvc;
+
+    @MockBean
+    private CategoryService categoryService;
 
     @MockBean
     private TaskService taskService;
@@ -52,12 +56,12 @@ public class TaskControllerTest {
                 "  \"content\": \"post\",\n" +
                 "  \"active\": true,\n" +
                 "  \"reviewStrategy\": \"EVERY_DAY\",\n" +
-                "  \"categories\": [\n" +
-                "    {\n" +
+                "  \"category\": " +
+                "{\n" +
                 "      \"id\": 1,\n" +
                 "      \"name\": \"rather\"\n" +
-                "    }\n" +
-                "  ],\n" +
+                "  }" +
+                ",\n" +
                 "  \"tags\": [\n" +
                 "    {\n" +
                 "      \"id\": 1,\n" +
@@ -79,12 +83,12 @@ public class TaskControllerTest {
                 "  \"content\": \"hide\",\n" +
                 "  \"active\": true,\n" +
                 "  \"reviewStrategy\": \"strike\",\n" +
-                "  \"categories\": [\n" +
-                "    {\n" +
+                "  \"category\": " +
+                "{\n" +
                 "      \"id\": 1,\n" +
                 "      \"name\": \"wreck\"\n" +
-                "    }\n" +
-                "  ],\n" +
+                "  }" +
+                ",\n" +
                 "  \"tags\": [\n" +
                 "    {\n" +
                 "      \"id\": 1,\n" +
@@ -106,11 +110,11 @@ public class TaskControllerTest {
                 "  \"content\": \"mile\",\n" +
                 "  \"active\": true,\n" +
                 "  \"reviewStrategy\": \"EVERY_DAY\",\n" +
-                "  \"categories\": [\n" +
-                "    {\n" +
+                "  \"category\": " +
+                "{\n" +
                 "      \"name\": \"breath\"\n" +
-                "    }\n" +
-                "  ],\n" +
+                "  }" +
+                ",\n" +
                 "  \"tags\": [\n" +
                 "    {\n" +
                 "      \"id\": 1,\n" +
@@ -135,12 +139,12 @@ public class TaskControllerTest {
                 "  \"title\": \"south\",\n" +
                 "  \"active\": true,\n" +
                 "  \"reviewStrategy\": \"EVERY_DAY\",\n" +
-                "  \"categories\": [\n" +
-                "    {\n" +
-                "      \"id\": 1,\n" +
-                "      \"name\": \"wheel\"\n" +
-                "    }\n" +
-                "  ],\n" +
+                "  \"category\": " +
+                "{\n" +
+                "    \"id\": 1,\n" +
+                "    \"name\": \"wheel\"\n" +
+                "  }" +
+                ",\n" +
                 "  \"tags\": [\n" +
                 "    {\n" +
                 "      \"id\": 1,\n" +
@@ -162,12 +166,12 @@ public class TaskControllerTest {
                 "  \"id\": 1,\n" +
                 "  \"active\": true,\n" +
                 "  \"reviewStrategy\": \"EVERY_DAY\",\n" +
-                "  \"categories\": [\n" +
-                "    {\n" +
-                "      \"id\": 1,\n" +
-                "      \"name\": \"describe\"\n" +
-                "    }\n" +
-                "  ],\n" +
+                "  \"category\": " +
+                "{\n" +
+                "    \"id\": 1,\n" +
+                "    \"name\": \"describe\"\n" +
+                "  }" +
+                ",\n" +
                 "  \"tags\": [\n" +
                 "    {\n" +
                 "      \"id\": 1,\n" +
@@ -189,12 +193,12 @@ public class TaskControllerTest {
                 "  \"id\": 1,\n" +
                 "  \"title\": \"fame\",\n" +
                 "  \"reviewStrategy\": \"EVERY_DAY\",\n" +
-                "  \"categories\": [\n" +
-                "    {\n" +
-                "      \"id\": 1,\n" +
-                "      \"name\": \"offense\"\n" +
-                "    }\n" +
-                "  ],\n" +
+                "  \"category\": " +
+                "{\n" +
+                "    \"id\": 1,\n" +
+                "    \"name\": \"offense\"\n" +
+                "  }" +
+                ",\n" +
                 "  \"tags\": [\n" +
                 "    {\n" +
                 "      \"id\": 1,\n" +
@@ -229,7 +233,7 @@ public class TaskControllerTest {
                 put("/task")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(withoutCategories)
-        ).andExpect(status().isBadRequest());
+        ).andExpect(status().isOk());
 
     }
 }

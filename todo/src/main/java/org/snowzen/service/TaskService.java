@@ -3,16 +3,14 @@ package org.snowzen.service;
 import org.snowzen.base.IdUtil;
 import org.snowzen.exception.NotFoundDataException;
 import org.snowzen.model.assembler.TaskAssembler;
-import org.snowzen.model.dto.CategoryDTO;
 import org.snowzen.model.dto.TagDTO;
 import org.snowzen.model.dto.TaskDTO;
 import org.snowzen.model.po.TaskPO;
-import org.snowzen.model.po.relation.CategoryTaskRelationPO;
 import org.snowzen.model.po.relation.TagTaskRelationPO;
 import org.snowzen.repository.dao.TaskRepository;
-import org.snowzen.repository.dao.relation.CategoryTaskRelationRepository;
 import org.snowzen.repository.dao.relation.TagTaskRelationRepository;
 import org.snowzen.review.ReviewTimeUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,24 +35,20 @@ public class TaskService {
 
     private final TagTaskRelationRepository tagTaskRelationRepository;
 
-    private final CategoryTaskRelationRepository categoryTaskRelationRepository;
-
     private final TaskAssembler taskAssembler;
 
     private final AssociatedTagLoader tagLoader;
 
-    private final AssociatedCategoryLoader categoryLoader;
+    @Autowired
+    private CategoryService categoryService;
 
     public TaskService(TaskRepository taskRepository,
                        TagTaskRelationRepository tagTaskRelationRepository,
-                       CategoryTaskRelationRepository categoryTaskRelationRepository,
-                       TaskAssembler taskAssembler, AssociatedTagLoader tagLoader, AssociatedCategoryLoader categoryLoader) {
+                       TaskAssembler taskAssembler, AssociatedTagLoader tagLoader) {
         this.taskRepository = taskRepository;
         this.tagTaskRelationRepository = tagTaskRelationRepository;
-        this.categoryTaskRelationRepository = categoryTaskRelationRepository;
         this.taskAssembler = taskAssembler;
         this.tagLoader = tagLoader;
-        this.categoryLoader = categoryLoader;
     }
 
 
@@ -66,6 +60,7 @@ public class TaskService {
     @Transactional(rollbackFor = Exception.class)
     public void addTask(TaskDTO taskDTO) {
         checkNotNull(taskDTO);
+        checkRelationCategoryExist(taskDTO);
 
         taskDTO.setId(null);
         TaskPO taskPO = taskAssembler.toPO(taskDTO);
@@ -77,12 +72,6 @@ public class TaskService {
         List<TagTaskRelationPO> tagTaskRelationPOList = fetchTagTaskRelation(taskDTO);
         if (!CollectionUtils.isEmpty(tagTaskRelationPOList)) {
             tagTaskRelationRepository.saveAll(tagTaskRelationPOList);
-        }
-
-        // 分类关联关系保存
-        List<CategoryTaskRelationPO> categoryTaskRelationPOList = fetchCategoryTaskRelation(taskDTO);
-        if (!CollectionUtils.isEmpty(categoryTaskRelationPOList)) {
-            categoryTaskRelationRepository.saveAll(categoryTaskRelationPOList);
         }
     }
 
@@ -98,7 +87,6 @@ public class TaskService {
 
         TaskDTO taskDTO = taskAssembler.toDTO(taskPO);
         tagLoader.injectTag(taskDTO);
-        categoryLoader.injectCategory(taskDTO);
         return taskDTO;
     }
 
@@ -115,8 +103,6 @@ public class TaskService {
                 .map(taskAssembler::toDTO).collect(Collectors.toList());
 
         tagLoader.injectTag(taskDTOList);
-        categoryLoader.injectCategory(taskDTOList);
-
         return taskDTOList;
     }
 
@@ -133,7 +119,6 @@ public class TaskService {
 
         List<TaskDTO> taskDTOList = result.stream().map(taskAssembler::toDTO).collect(Collectors.toList());
         tagLoader.injectTag(taskDTOList);
-        categoryLoader.injectCategory(taskDTOList);
         return taskDTOList;
     }
 
@@ -149,7 +134,6 @@ public class TaskService {
                 .map(taskAssembler::toDTO)
                 .collect(Collectors.toList());
         tagLoader.injectTag(taskDTOList);
-        categoryLoader.injectCategory(taskDTOList);
         return taskDTOList;
     }
 
@@ -188,6 +172,7 @@ public class TaskService {
         checkNotNull(taskDTO);
         checkArgument(IdUtil.checkId(taskDTO.getId()));
         checkState(taskRepository.existsById(taskDTO.getId()), "任务不存在");
+        checkRelationCategoryExist(taskDTO);
 
         // 保存任务
         TaskPO taskPO = taskAssembler.toPO(taskDTO);
@@ -213,25 +198,6 @@ public class TaskService {
         if (!CollectionUtils.isEmpty(insertTagTaskRelationPOList)) {
             tagTaskRelationRepository.saveAll(insertTagTaskRelationPOList);
         }
-
-        List<CategoryTaskRelationPO> categoryTaskRelationPOList = fetchCategoryTaskRelation(taskDTO);
-        List<CategoryTaskRelationPO> categoryTaskRelationPOListFromDB = categoryTaskRelationRepository.findAllByTaskId(taskId);
-
-        // 删除多余分类关联
-        List<CategoryTaskRelationPO> removeCategoryTaskRelationPOList = new ArrayList<>(categoryTaskRelationPOListFromDB);
-        removeCategoryTaskRelationPOList.removeAll(categoryTaskRelationPOList);
-
-        if (!CollectionUtils.isEmpty(removeCategoryTaskRelationPOList)) {
-            categoryTaskRelationRepository.deleteAll(removeCategoryTaskRelationPOList);
-        }
-
-        // 插入新增分类关联
-        List<CategoryTaskRelationPO> insertCategoryTaskRelationPOList = new ArrayList<>(categoryTaskRelationPOList);
-        insertCategoryTaskRelationPOList.removeAll(categoryTaskRelationPOListFromDB);
-
-        if (!CollectionUtils.isEmpty(insertCategoryTaskRelationPOList)) {
-            categoryTaskRelationRepository.saveAll(insertCategoryTaskRelationPOList);
-        }
     }
 
     /**
@@ -248,7 +214,6 @@ public class TaskService {
         }
         taskRepository.deleteById(taskId);
         tagTaskRelationRepository.deleteAllByTaskId(taskId);
-        categoryTaskRelationRepository.deleteAllByTaskId(taskId);
     }
 
     /**
@@ -269,74 +234,16 @@ public class TaskService {
                 }).collect(Collectors.toList());
     }
 
-    /**
-     * 从{@link TaskDTO}提取分类关联关系
-     */
-    private List<CategoryTaskRelationPO> fetchCategoryTaskRelation(TaskDTO taskDTO) {
-        checkArgument(IdUtil.checkId(taskDTO.getId()));
-
-        Integer taskId = taskDTO.getId();
-        return Optional.ofNullable(taskDTO.getCategories())
-                .orElse(Collections.emptyList())
-                .stream()
-                .map(categoryDTO -> {
-                    CategoryTaskRelationPO categoryTaskRelationPO = new CategoryTaskRelationPO();
-                    categoryTaskRelationPO.setTaskId(taskId);
-                    categoryTaskRelationPO.setCategoryId(categoryDTO.getId());
-                    return categoryTaskRelationPO;
-                }).collect(Collectors.toList());
-    }
-
-    /**
-     * 关联分类装载器
-     */
-    @Component
-    static class AssociatedCategoryLoader {
-
-        private final CategoryService categoryService;
-
-        private final CategoryTaskRelationRepository categoryTaskRelationRepository;
-
-        public AssociatedCategoryLoader(CategoryService categoryService, CategoryTaskRelationRepository categoryTaskRelationRepository) {
-            this.categoryService = categoryService;
-            this.categoryTaskRelationRepository = categoryTaskRelationRepository;
-        }
-
-        public void injectCategory(TaskDTO taskDTO) {
-            injectCategory(Collections.singletonList(taskDTO));
-        }
-
-        public void injectCategory(List<TaskDTO> taskDTOList) {
-            // 查询关联关系
-            List<CategoryTaskRelationPO> categoryTaskRelationPOList = categoryTaskRelationRepository.findAllByTaskIdIn(
-                    taskDTOList.stream().map(TaskDTO::getId).collect(Collectors.toList()));
-
-            // 聚合categoryId查询category
-            List<CategoryDTO> categoryDTOList = categoryService.findAllCategoryById(
-                    categoryTaskRelationPOList.stream().map(CategoryTaskRelationPO::getCategoryId).collect(Collectors.toList()));
-
-            // 建立map
-            Map<Integer, TaskDTO> taskDTOMap = taskDTOList.stream().collect(Collectors.toMap(TaskDTO::getId, taskDTO -> taskDTO));
-            Map<Integer, CategoryDTO> categoryDTOMap = categoryDTOList.stream().collect(Collectors.toMap(CategoryDTO::getId, categoryDTO -> categoryDTO));
-
-            // 遍历关联关系，注入
-            categoryTaskRelationPOList.forEach(relation -> {
-                TaskDTO taskDTO = taskDTOMap.get(relation.getTaskId());
-                CategoryDTO categoryDTO = categoryDTOMap.get(relation.getCategoryId());
-                if (taskDTO.getCategories() == null) {
-                    taskDTO.setCategories(Collections.singletonList(categoryDTO));
-                } else {
-                    taskDTO.getCategories().add(categoryDTO);
-                }
-            });
-        }
+    private void checkRelationCategoryExist(TaskDTO taskDTO) {
+        checkState(taskDTO.getCategory() == null ||
+                categoryService.hasCategory(taskDTO.getCategory().getId()));
     }
 
     /**
      * 关联标签装载器
      */
     @Component
-    static class AssociatedTagLoader {
+    static class AssociatedTagLoader { // TODO 改为Assembler中执行注入
 
         private final TagService tagService;
 

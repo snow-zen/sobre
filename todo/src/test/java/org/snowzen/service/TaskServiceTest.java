@@ -3,7 +3,6 @@ package org.snowzen.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mapstruct.factory.Mappers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.snowzen.exception.NotFoundDataException;
@@ -12,16 +11,15 @@ import org.snowzen.model.dto.CategoryDTO;
 import org.snowzen.model.dto.TagDTO;
 import org.snowzen.model.dto.TaskDTO;
 import org.snowzen.model.po.TaskPO;
-import org.snowzen.model.po.relation.CategoryTaskRelationPO;
 import org.snowzen.model.po.relation.TagTaskRelationPO;
 import org.snowzen.repository.dao.TaskRepository;
-import org.snowzen.repository.dao.relation.CategoryTaskRelationRepository;
 import org.snowzen.repository.dao.relation.TagTaskRelationRepository;
 import org.snowzen.review.ReviewStrategy;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
@@ -39,7 +37,6 @@ import static org.mockito.Mockito.*;
 /**
  * @author snow-zen
  */
-@SuppressWarnings("WrongUsageOfMappersFactory")
 @ExtendWith(MockitoExtension.class)
 @WebAppConfiguration
 @ContextConfiguration(classes = MockServletContext.class)
@@ -51,30 +48,27 @@ public class TaskServiceTest {
     private TaskAssembler taskAssembler;
 
     @Mock
+    private CategoryService categoryService;
+
+    @Mock
     private TaskRepository taskRepository;
 
     @Mock
     private TagTaskRelationRepository tagTaskRelationRepository;
 
     @Mock
-    private CategoryTaskRelationRepository categoryTaskRelationRepository;
-
-    @Mock
     private TaskService.AssociatedTagLoader tagLoader;
-
-    @Mock
-    private TaskService.AssociatedCategoryLoader categoryLoader;
 
     @BeforeEach
     public void createService() {
-        taskAssembler = Mappers.getMapper(TaskAssembler.class);
+        taskAssembler = new TaskAssembler();
         taskService = new TaskService(
                 taskRepository,
                 tagTaskRelationRepository,
-                categoryTaskRelationRepository,
                 taskAssembler,
-                tagLoader,
-                categoryLoader);
+                tagLoader);
+        ReflectionTestUtils.setField(taskAssembler, "categoryService", categoryService);
+        ReflectionTestUtils.setField(taskService, "categoryService", categoryService);
     }
 
     @Test
@@ -110,9 +104,10 @@ public class TaskServiceTest {
         taskDTO.setContent("测试任务内容");
         taskDTO.setFinishTime(LocalDateTime.now());
         taskDTO.setReviewStrategy(ReviewStrategy.EVERY_DAY);
-        taskDTO.setCategories(Collections.singletonList(categoryDTO));
+        taskDTO.setCategory(categoryDTO);
         taskDTO.setTags(Collections.singletonList(tagDTO));
 
+        when(categoryService.hasCategory(1)).thenReturn(true);
         when(taskRepository.save(any(TaskPO.class))).then(invocation -> {
             TaskPO taskPO = invocation.getArgument(0, TaskPO.class);
             taskPO.prePersistCallback();
@@ -120,7 +115,6 @@ public class TaskServiceTest {
             return taskPO;
         });
         when(tagTaskRelationRepository.saveAll(any())).then(invocation -> invocation.getArgument(0, List.class));
-        when(categoryTaskRelationRepository.saveAll(any())).then(invocation -> invocation.getArgument(0, List.class));
 
         taskService.addTask(taskDTO);
     }
@@ -145,11 +139,6 @@ public class TaskServiceTest {
         tagDTO.setName("duck");
 
         when(taskRepository.findById(1)).thenReturn(Optional.of(taskPO));
-        doAnswer(invocation -> {
-            TaskDTO taskDTO = invocation.getArgument(0, TaskDTO.class);
-            taskDTO.setCategories(Collections.singletonList(categoryDTO));
-            return null;
-        }).when(categoryLoader).injectCategory(any(TaskDTO.class));
         doAnswer(invocation -> {
             TaskDTO taskDTO = invocation.getArgument(0, TaskDTO.class);
             taskDTO.setTags(Collections.singletonList(tagDTO));
@@ -294,13 +283,9 @@ public class TaskServiceTest {
 
     @Test
     public void testModify() {
-        CategoryDTO categoryDTO1 = new CategoryDTO();
-        categoryDTO1.setId(1);
-        categoryDTO1.setName("测试分类1");
-
-        CategoryDTO categoryDTO2 = new CategoryDTO();
-        categoryDTO2.setId(2);
-        categoryDTO2.setName("测试分类2");
+        CategoryDTO categoryDTO = new CategoryDTO();
+        categoryDTO.setId(1);
+        categoryDTO.setName("测试分类1");
 
         TagDTO tagDTO1 = new TagDTO();
         tagDTO1.setId(1);
@@ -314,7 +299,7 @@ public class TaskServiceTest {
         taskDTO.setId(1);
         taskDTO.setTitle("测试任务");
         taskDTO.setContent("测试内容");
-        taskDTO.setCategories(Arrays.asList(categoryDTO1, categoryDTO2));
+        taskDTO.setCategory(categoryDTO);
         taskDTO.setTags(Arrays.asList(tagDTO1, tagDTO2));
 
         List<TagTaskRelationPO> tagTaskRelationPOList = Arrays.asList(
@@ -322,19 +307,12 @@ public class TaskServiceTest {
                 new TagTaskRelationPO(1, 3)
         );
 
-        List<CategoryTaskRelationPO> categoryTaskRelationPOList = Arrays.asList(
-                new CategoryTaskRelationPO(1, 1),
-                new CategoryTaskRelationPO(1, 3)
-        );
-
+        when(categoryService.hasCategory(1)).thenReturn(true);
         when(taskRepository.existsById(1)).thenReturn(Boolean.TRUE);
         when(taskRepository.save(any(TaskPO.class))).then(invocation -> invocation.getArgument(0, TaskPO.class));
         when(tagTaskRelationRepository.findAllByTaskId(1)).thenReturn(tagTaskRelationPOList);
         doNothing().when(tagTaskRelationRepository).deleteAll(any());
         when(tagTaskRelationRepository.saveAll(any())).then(invocation -> invocation.getArgument(0, List.class));
-        when(categoryTaskRelationRepository.findAllByTaskId(1)).thenReturn(categoryTaskRelationPOList);
-        doNothing().when(categoryTaskRelationRepository).deleteAll(any());
-        when(categoryTaskRelationRepository.saveAll(any())).then(invocation -> invocation.getArgument(0, List.class));
 
         assertDoesNotThrow(() -> taskService.modify(taskDTO));
     }
@@ -344,7 +322,6 @@ public class TaskServiceTest {
         when(taskRepository.existsById(1)).thenReturn(Boolean.TRUE);
         doNothing().when(taskRepository).deleteById(1);
         doNothing().when(tagTaskRelationRepository).deleteAllByTaskId(1);
-        doNothing().when(categoryTaskRelationRepository).deleteAllByTaskId(1);
 
         assertDoesNotThrow(() -> taskService.delete(1));
     }
