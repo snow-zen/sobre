@@ -1,6 +1,7 @@
 # 日志打印
 logging:
   level:
+    web: debug
     org.hibernate.SQL: debug
     org.hibernate.type.descriptor.sql.BasicBinder: trace
 
@@ -25,11 +26,19 @@ spring:
   # jackson配置
   jackson:
     default-property-inclusion: non_null
+  # profiles配置
+  profiles:
+    active: @env@
+  devtools:
+    add-properties: true
+  jmx:
+    enabled: false
 
 # actuator配置
-management:
-  endpoints:
-    web:
-      base-path: /manager
-      exposure:
-        include: "*"
+#management:
+#  endpoints:
+#    web:
+#      base-path: /manager
+#      exposure:
+#        include: "*"
+debug: true
