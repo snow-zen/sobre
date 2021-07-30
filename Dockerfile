@@ -2,7 +2,7 @@ FROM openjdk:8-jre-slim as builder
 
 WORKDIR /application
 
-ARG TODO_JAR=./target/todo-0.0.1-SNAPSHOT.jar
+ARG TODO_JAR=./todo/target/todo-0.0.1-SNAPSHOT.jar
 
 COPY ${TODO_JAR} application.jar
 
