@@ -1,0 +1,23 @@
+namespace: sobre
+
+labels:
+  app.kubernetes.io/name: todo
+  app.kubernetes.io/version: "0.0.1-SNAPSHOT"
+  app.kubernetes.io/component: backend
+  app.kubernetes.io/part-of: sobre
+  app.kubernetes.io/managed-by: helm
+  app.kubernetes.io/created-by: controller-manager
+
+replicaCount: 1
+
+image:
+  repository: registry.cn-hangzhou.aliyuncs.com/zxj2333/sobre
+  tag: v1
+  pullPolicy: Always
+
+progressDeadlineSeconds: 600
+revisionHistoryLimit: 3
+
+service:
+  type: NodePort
+

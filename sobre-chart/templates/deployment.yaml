@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-deployment
+  namespace: {{ .Values.namespace }}
+  labels:
+  {{- include "sobre-chart.labels" . | indent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app: sobre
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: sobre
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          env:
+          {{- include "sobre-chart.env" . | indent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 8080
+      {{- include "sobre-chart.secret" . | indent 6 }}
+  progressDeadlineSeconds: {{ .Values.progressDeadlineSeconds }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 2
